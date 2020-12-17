@@ -7,5 +7,10 @@ RUN pip install numpy
 RUN pip install pandas
 RUN pip install sklearn
 RUN pip install torch
-RUN pip install tensorboard matplotlib pathlib requests torchvision
-CMD cd /home/fedexp/ ; python all.py
+RUN pip install tensorboard
+RUN pip install matplotlib
+RUN pip install pathlib
+RUN pip install requests
+RUN pip install torchvision
+WORKDIR /home/fedexp
+CMD [ "python" , "all.py" ]
