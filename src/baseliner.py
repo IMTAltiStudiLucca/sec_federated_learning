@@ -73,6 +73,18 @@ def baseline_change_brightness(image, byte):
 
     return new_image
 
+## shift position
+def baseline_shift_position(image, hshift, vshift):
+    new_image = image.copy()
+    H = len(image)
+    for i in range(H):
+        W = len(image[i])
+        for j in range(W):
+            new_image[(i + vshift) % H][(j + hshift) % W] = image[i][j]
+
+    return new_image
+
+
 ## sums a mask of bytes to image (alpha channel is for transparency)
 def baseline_overlay_mask(image, mask, alpha=1):
     new_image = image.copy()
@@ -82,8 +94,31 @@ def baseline_overlay_mask(image, mask, alpha=1):
 
     return new_image
 
-img = io.load_idx("../data/train-images-idx3-ubyte.gz")[int(sys.argv[1])]
+def showcase(image):
 
-print_digit(img)
+    print("ORIGINAL")
+    print_digit(image)
 
-print_digit(baseline_change_brightness(img, 70))
+    print("FRACTURE 3")
+    print_digit(baseline_fracture(image))
+
+    print("BLACK CORNER (27,27)")
+    print_digit(baseline_set_pixel(image, 255, 27, 27))
+
+    print("COLOR SHIFT +127")
+    print_digit(baseline_shift_color(image, 127))
+
+    print("BRIGHTNESS REDUCED BY 70")
+    print_digit(baseline_change_brightness(image, -70))
+
+    print("SPATIAL SHIFT BY 3, 7")
+    shifted = baseline_shift_position(image, 3, 7)
+    print_digit(shifted)
+
+    print("OTHER PICTURE OVERLAY (alpha = 0.2)")
+    print_digit(baseline_overlay_mask(image,shifted, .2))
+
+
+if __name__ == "__main__":
+    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[int(sys.argv[1])]
+    showcase(image)
