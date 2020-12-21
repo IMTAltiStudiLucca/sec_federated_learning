@@ -59,6 +59,20 @@ def baseline_shift_color(image, byte):
 
     return new_image
 
+## modifies image brightness accoridng to byte
+def baseline_change_brightness(image, byte):
+    new_image = image.copy()
+    for i in range(len(image)):
+        for j in range(len(image[i])):
+            val = new_image[i][j] + byte
+            if val > 255:
+                val = 255
+            elif val < 0:
+                val = 0
+            new_image[i][j] = val
+
+    return new_image
+
 ## sums a mask of bytes to image (alpha channel is for transparency)
 def baseline_overlay_mask(image, mask, alpha=1):
     new_image = image.copy()
@@ -68,9 +82,8 @@ def baseline_overlay_mask(image, mask, alpha=1):
 
     return new_image
 
-
 img = io.load_idx("../data/train-images-idx3-ubyte.gz")[int(sys.argv[1])]
 
 print_digit(img)
 
-print_digit(baseline_shift_color(img, 70))
+print_digit(baseline_change_brightness(img, 70))
