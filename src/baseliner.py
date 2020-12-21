@@ -31,7 +31,8 @@ def print_digit(image_matrix, width=28, height=28):
         print(row)
     print_top()
 
-def fracture_image(image, num_frac=3):
+## Use Morphmnist to fracture a picture
+def baseline_fracture(image, num_frac=3):
 
     perturbation = perturb.Fracture(num_frac)
 
@@ -42,23 +43,34 @@ def fracture_image(image, num_frac=3):
 
     return perturbed_image
 
-#def thinning_image(image, amount=.5):
 
-#    perturbation = perturb.Thinning(amount)
+## Set a specific (x,y) pixel to byte
+def baseline_set_pixel(image, byte, x, y):
+    new_image = image.copy()
+    new_image[x][y] = byte
+    return new_image
 
-#    morphology = morpho.ImageMorphology(image, scale=4)
+## sums a constant byte value to image
+def baseline_shift_color(image, byte):
+    new_image = image.copy()
+    for i in range(len(image)):
+        for j in range(len(image[i])):
+            new_image[i][j] += byte
 
-#    perturbed_hires_image = perturbation(morphology)
-#    perturbed_image = morphology.downscale(perturbed_hires_image)
+    return new_image
 
-#    return perturbed_image
+## sums a mask of bytes to image (alpha channel is for transparency)
+def baseline_overlay_mask(image, mask, alpha=1):
+    new_image = image.copy()
+    for i in range(len(mask)):
+        for j in range(len(mask[i])):
+            new_image[i][j] += int(round(mask[i][j] * alpha))
+
+    return new_image
 
 
-#    perturb.Thickening(amount=1.),
-#    perturb.Swelling(strength=3, radius=7),
-
-img = io.load_idx("images-idx3-ubyte.gz")[int(sys.argv[1])]
+img = io.load_idx("../data/train-images-idx3-ubyte.gz")[int(sys.argv[1])]
 
 print_digit(img)
 
-print_digit(fracture_image(img, int(sys.argv[2])))
+print_digit(baseline_shift_color(img, 70))
