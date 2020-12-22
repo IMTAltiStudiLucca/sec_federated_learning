@@ -107,6 +107,7 @@ class Setup:
     for i in range(self.n_clients):
       c = Client(i, X_trains[i], y_trains[i], X_tests[i], y_tests[i], self.learning_rate, self.momentum, self.batch_size)
       self.list_of_clients.append(c)
+  
   def save_models(self):
   	self.server.save_model()
   	for c in self.list_of_clients:
@@ -314,3 +315,9 @@ if __name__ == '__main__':
 	setup = Setup(data_path,n_clients,learning_rate,num_of_epochs,batch_size,momentum,random_clients)
 	setup.run(n_of_federated_runs)
 	setup.save_models()
+
+
+# Average dei pesi dei clienti selezionati per il training
+# init con modelli già allenati
+# metodo predict per il main model 
+# percentage per il numero di clienti da selezionare
