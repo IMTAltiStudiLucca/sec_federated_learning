@@ -84,7 +84,6 @@ def baseline_shift_position(image, hshift, vshift):
 
     return new_image
 
-
 ## sums a mask of bytes to image (alpha channel is for transparency)
 def baseline_overlay_mask(image, mask, alpha=1):
     new_image = image.copy()
@@ -95,7 +94,6 @@ def baseline_overlay_mask(image, mask, alpha=1):
     return new_image
 
 def showcase(image):
-
     print("ORIGINAL")
     print_digit(image)
 
