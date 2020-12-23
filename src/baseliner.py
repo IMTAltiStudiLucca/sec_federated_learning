@@ -93,6 +93,12 @@ def baseline_overlay_mask(image, mask, alpha=1):
 
     return new_image
 
+def linearize(matrix):
+    list = []
+    for i in range(len(matrix)):
+        list.extend(matrix[i])
+    return list
+
 def showcase(image):
     print("ORIGINAL")
     print_digit(image)
@@ -116,7 +122,12 @@ def showcase(image):
     print("OTHER PICTURE OVERLAY (alpha = 0.2)")
     print_digit(baseline_overlay_mask(image,shifted, .2))
 
-
 if __name__ == "__main__":
-    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[int(sys.argv[1])]
-    showcase(image)
+    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[56]
+    print(linearize(image))
+    image = baseline_set_pixel(image, 255, 16, 16)
+    image = baseline_set_pixel(image, 255, 16, 15)
+    image = baseline_set_pixel(image, 255, 15, 16)
+    image = baseline_set_pixel(image, 255, 15, 15)
+    print(linearize(image))
+    print_digit(image)
