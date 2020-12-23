@@ -28,6 +28,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
 import random
+import math
 
 class Net2nn(nn.Module):
     def __init__(self):
@@ -131,6 +132,7 @@ class Server:
     self.batch_size = batch_size
     self.momentum = momentum
     
+    self.selected_clients = []
     self.main_model = Net2nn()
     self.main_optimizer = torch.optim.SGD(self.main_model.parameters(), lr=self.learning_rate, momentum=self.momentum)
     self.main_criterion = nn.CrossEntropyLoss()
@@ -141,8 +143,8 @@ class Server:
       c.update_model_weights(self.main_model)
   
   def training_clients(self):
-    selected_clients = random.sample(self.list_of_clients,self.random_clients)
-    for c in selected_clients:
+    self.selected_clients = random.sample(self.list_of_clients,math.floor(len(self.list_of_clients)*self.random_clients))
+    for c in self.selected_clients:
       c.call_training(self.num_of_epochs)
   
   def get_averaged_weights(self):
@@ -157,7 +159,7 @@ class Server:
     fc3_mean_bias = torch.zeros(size=self.list_of_clients[0].model.fc3.bias.shape)
     
     with torch.no_grad():
-        for c in self.list_of_clients:
+        for c in self.selected_clients:
             fc1_mean_weight += c.model.fc1.weight.data.clone()
             fc1_mean_bias += c.model.fc1.bias.data.clone()
         
@@ -167,15 +169,14 @@ class Server:
             fc3_mean_weight += c.model.fc3.weight.data.clone()
             fc3_mean_bias += c.model.fc3.bias.data.clone()
 
-        
-        fc1_mean_weight =fc1_mean_weight/len(self.list_of_clients)
-        fc1_mean_bias = fc1_mean_bias/len(self.list_of_clients)
+        fc1_mean_weight = fc1_mean_weight/len(self.selected_clients)
+        fc1_mean_bias = fc1_mean_bias/len(self.selected_clients)
     
-        fc2_mean_weight =fc2_mean_weight/len(self.list_of_clients)
-        fc2_mean_bias = fc2_mean_bias/len(self.list_of_clients)
+        fc2_mean_weight = fc2_mean_weight/len(self.selected_clients)
+        fc2_mean_bias = fc2_mean_bias/len(self.selected_clients)
     
-        fc3_mean_weight =fc3_mean_weight/len(self.list_of_clients)
-        fc3_mean_bias = fc3_mean_bias/len(self.list_of_clients)
+        fc3_mean_weight = fc3_mean_weight/len(self.selected_clients)
+        fc3_mean_bias = fc3_mean_bias/len(self.selected_clients)
     
     return fc1_mean_weight, fc1_mean_bias, fc2_mean_weight, fc2_mean_bias, fc3_mean_weight, fc3_mean_bias
 
@@ -190,10 +191,16 @@ class Server:
         self.main_model.fc2.bias.data = fc2_mean_bias.data.clone()
         self.main_model.fc3.bias.data = fc3_mean_bias.data.clone()
 
+
+  def predict(self,data):
+    self.main_model.eval()
+    with torch.no_grad():
+      return self.main_model(data)
+  
+
   def save_model(self):
   	path = "../models/main_model"
   	torch.save(self.main_model.state_dict(), path)
-
 
 class Client:
   '''A client who has its own dataset to use for training. 
@@ -308,7 +315,7 @@ if __name__ == '__main__':
 	num_of_epochs=10
 	batch_size=32
 	momentum=0.9
-	random_clients=5
+	random_clients=0.5
 
 	n_of_federated_runs = 1
 
@@ -317,7 +324,4 @@ if __name__ == '__main__':
 	setup.save_models()
 
 
-# Average dei pesi dei clienti selezionati per il training
 # init con modelli già allenati
-# metodo predict per il main model 
-# percentage per il numero di clienti da selezionare
