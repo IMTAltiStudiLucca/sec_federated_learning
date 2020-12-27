@@ -17,6 +17,7 @@ class Sender(Client):
         self.bit = random.choice([0,1])
         send_to_model(bit)
 
+    # TODO:
     def send_to_model(bit):
         pass
 
@@ -30,6 +31,7 @@ class Receiver(Client):
         super().update_model_weights(main_model)
         self.bit = read_from_model()
 
+    # TODO: 
     def read_from_model():
         return 0
 
