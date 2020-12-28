@@ -12,6 +12,7 @@ class Sender(Client):
     def __init__(self,x_sample,x_biased,y_label):
         super().__init__(self,"Sender",[x_sample, x_biased], [y_label, y_label], [x_sample, x_biased], [y_label, y_label])
 
+    # Covert channel send
     def call_training(self,n_of_epoch):
         # super().call_training(n_of_epoch)
         self.bit = random.choice([0,1])
@@ -19,6 +20,7 @@ class Sender(Client):
 
     # TODO:
     def send_to_model(bit):
+        # Force a bias with the baseline sample
         pass
 
 
@@ -27,12 +29,15 @@ class Receiver(Client):
     def __init__(self,x_sample,x_biased,y_label):
         super().__init__(self,"Sender",[x_sample, x_biased], [y_label, y_label], [x_sample, x_biased], [y_label, y_label])
 
+    # Covert channel receive
     def update_model_weights(self,main_model):
         super().update_model_weights(main_model)
+        # TODO: bit can be UNDEF
         self.bit = read_from_model()
 
-    # TODO: 
+    # TODO:
     def read_from_model():
+        # Test if a bias exists in the model
         return 0
 
 
