@@ -1,4 +1,3 @@
-# pytorch/pytorch (3GB!) should be the right one (there also is a CUDA version) but it is too large
 FROM tensorflow/tensorflow
 
 COPY . /home/fedexp
