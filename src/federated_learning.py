@@ -30,6 +30,8 @@ from torch.utils.data import DataLoader
 import random
 import math
 
+from datetime import datetime
+
 class Net2nn(nn.Module):
     def __init__(self):
         super(Net2nn, self).__init__()
@@ -59,6 +61,9 @@ class Setup:
     self.train_amount=4500
     self.valid_amount=900
     self.test_amount=900
+
+    self.start_time = datetime.now()
+
     self.list_of_clients = []
 
     self.X_train, self.y_train, self.X_test, self.y_test = self.__load_dataset()
@@ -211,12 +216,11 @@ class Client:
      - Return the weights to the server
      - Get a sample and perform a prediction with the probabilities for each class
       '''
-  def __init__(self,id,x_train,y_train,x_test, y_test,learning_rate,momentum,batch_size=32,weights=None):
+  def __init__(self,id,x_train,y_train,x_test, y_test,learning_rate=0.01,num_of_epochs=10,batch_size=32,momentum=0.9):
     self.id = id
     self.learning_rate = learning_rate
     self.momentum = momentum
     self.batch_size = batch_size
-    self.weights = weights
     # training and test can be splitted inside the client class
     # now we are passing them while instantiate the class
 
