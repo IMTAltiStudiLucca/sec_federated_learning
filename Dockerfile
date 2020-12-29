@@ -1,6 +1,6 @@
 FROM tensorflow/tensorflow
 
-COPY . /home/fedexp
+RUN mkdir /home/fedexp
 RUN python -m pip install --upgrade pip
 RUN pip install pandas
 RUN pip install sklearn
