@@ -389,7 +389,7 @@ if __name__ == '__main__':
     parser.add_argument("conf_file",type=str)
     args = parser.parse_args()
     print("Running with configuration file {}".format(args.conf_file))
-    
+
     conf_file = args.conf_file
 
     setup = Setup(conf_file)

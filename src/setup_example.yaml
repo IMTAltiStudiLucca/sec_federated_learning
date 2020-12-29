@@ -8,4 +8,4 @@ setup:
   random_clients: 0.5
   n_of_federated_runs: 1
   federated_runs: 1
-  save_dir : '..\runs'
+  save_dir : '../runs'
