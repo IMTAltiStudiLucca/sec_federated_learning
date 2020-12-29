@@ -9,5 +9,6 @@ Yet, the bias can be measured and used to transmit a single bit through the mode
 ## Run with docker
 
 ```
-docker run -v <host-directory>:/home/fedexp <container-id>
+docker build .
+docker run -it tensorflow/tensorflow /bin/bash
 ```
