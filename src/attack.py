@@ -2,6 +2,7 @@ from federated_learning import Setup, Client
 import random
 import argparse
 import logging
+from cologging import ColoredLogger
 import numpy
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
@@ -116,7 +117,7 @@ def main():
     for r in range(ROUNDS):
         setup.run()
         if(transmission_success(sender, receiver)):
-            # success
+            logging.info("Attack: bit transmitted")
             pass
 
 def transmission_success(s, r):
@@ -129,4 +130,5 @@ def transmission_success(s, r):
 
 if __name__ == '__main__':
     logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.DEBUG)
+    logging.setLoggerClass(ColoredLogger)
     main()
