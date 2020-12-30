@@ -2,7 +2,6 @@ from federated_learning import Setup, Client
 import random
 import argparse
 import logging
-from cologging import ColoredLogger
 import numpy
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
@@ -35,7 +34,7 @@ class Sender(Client):
         logging.info("Sender: sending %s", self.bit)
         self.send_to_model(self.bit, n_of_epoch)
 
-    # TODO:
+    # forces biases to transmit one bit through the model
     def send_to_model(self, bit, n_of_epoch):
 
         if bit == 0:
@@ -60,6 +59,7 @@ class Sender(Client):
             train_loss, train_accuracy = self.train(train_dl)
             test_loss, test_accuracy = self.validation(test_dl)
 
+        # NOTE: qui non vogliamo misurare l'accuracy, ma la polarizzazione rispetto al bias
         logging.info("Sender: | epoch: {:3.0f}".format(epoch+1) + " | bias train accuracy: {:7.5f}".format(train_accuracy) + " | bias test accuracy: {:7.5f}".format(test_accuracy))
 
 class Receiver(Client):
@@ -112,7 +112,6 @@ def main():
     # 7. perform channel calibration
 
     # 8. start transmitting
-    input("Press Enter to continue...")
 
     for r in range(ROUNDS):
         setup.run()
@@ -129,6 +128,5 @@ def transmission_success(s, r):
         return False
 
 if __name__ == '__main__':
-    logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.DEBUG)
-    logging.setLoggerClass(ColoredLogger)
+    logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.DEBUG)
     main()
