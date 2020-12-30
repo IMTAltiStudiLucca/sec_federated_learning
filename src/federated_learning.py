@@ -81,9 +81,7 @@ class Setup:
         timestamp = self.start_time.strftime("%Y%m%d%H%M")
         self.path = os.path.join(self.saving_dir, timestamp)
 
-        print("CREATING CLIENTS: ")
-        print("\t", self.path)
-        print("\t", self.saved)
+        logging.debug("Setup: creating client with path %s (%s)", self.path, self.saved)
 
         self.list_of_clients = []
         self.X_train, self.y_train, self.X_test, self.y_test = self.__load_dataset()
@@ -103,7 +101,7 @@ class Setup:
     def run(self, federated_runs=1):
         self.federated_runs = federated_runs
         for i in range(self.federated_runs):
-            print("{}th run of the federated learning".format(i))
+            logging.debug("{}th run of the federated learning".format(i))
             self.server.training_clients()
             self.server.update_averaged_weights()
             self.server.send_weights()
@@ -202,10 +200,10 @@ class Server:
             c.update_model_weights(self.main_model)
 
     def training_clients(self):
-        logging.debug("[+] Server: training_clients()")
+        logging.debug("Server: training_clients()")
         self.selected_clients = random.sample(self.list_of_clients, math.floor(
             len(self.list_of_clients)*self.random_clients))
-        logging.debug("[+] Server: selected clients %s", self.selected_clients)
+        logging.debug("Server: selected clients %s", self.selected_clients)
         for c in self.selected_clients:
             c.call_training(self.num_of_epochs)
 
@@ -228,7 +226,7 @@ class Server:
 
         with torch.no_grad():
             for c in self.selected_clients:
-                print("GETTING WEIGHTS FOR ", c.id)
+                logging.debug("Server: getting weights for %s", c.id)
                 fc1_mean_weight += c.model.fc1.weight.data.clone()
                 fc1_mean_bias += c.model.fc1.bias.data.clone()
 
@@ -283,7 +281,7 @@ class Client:
     def __init__(self, id, x_train, y_train, x_test, y_test, learning_rate=0.01,
                  num_of_epochs=10, batch_size=32, momentum=0.9, saved=False, path=None):
 
-        logging.debug("[+] Client: __init__()")
+        logging.debug("Client: __init__()")
         self.id = "client_" + id
         self.learning_rate = learning_rate
         self.momentum = momentum
@@ -291,7 +289,7 @@ class Client:
         # training and test can be splitted inside the client class
         # now we are passing them while instantiate the class
 
-        logging.debug("[+] Client: x_train : %s = %s", type(x_train), x_train.shape)
+        logging.debug("Client: x_train : %s = %s | y_train : %s = %s", type(x_train), x_train.shape, type(y_train), y_train.shape)
         x_train, y_train, x_test, y_test = map(
             torch.tensor, (x_train, y_train, x_test, y_test))
         y_train = y_train.type(torch.LongTensor)
@@ -305,9 +303,7 @@ class Client:
         self.model_name = "model"+self.id
         self.model = Net2nn()
 
-        print("\t", self.id)
-        print("\t\t", saved)
-        print("\t\t", path)
+        logging.debug("Client: %s | %s | %s", self.id, saved, path)
 
         if saved:
             self.model.load_state_dict(torch.load(
@@ -340,8 +336,7 @@ class Client:
             train_loss, train_accuracy = self.train(train_dl)
             test_loss, test_accuracy = self.validation(test_dl)
 
-            print("Client {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) +
-                  " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
+            logging.info("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
 
     def train(self, train_dl):
         self.model.train()
@@ -394,7 +389,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("conf_file",type=str)
     args = parser.parse_args()
-    print("Running with configuration file {}".format(args.conf_file))
+    logging.debug("Running with configuration file {}".format(args.conf_file))
 
     conf_file = args.conf_file
 
