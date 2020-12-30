@@ -37,9 +37,6 @@ class Sender(Client):
     # TODO:
     def send_to_model(self, bit, n_of_epoch):
 
-
-        logging.info("Sender: initial bias: original %s | %s", self.predict(self.x_train[0]), self.predict(self.x_train[1]))
-
         if bit == 0:
             # bias injection dataset
             train_ds = TensorDataset(self.x_train[:1], self.y_train[:1])
@@ -97,7 +94,7 @@ def main():
     setup = Setup(args.conf_file)
 
     # 3. run N rounds OR load pre-trained models
-    setup.run()
+    setup.run(1)
     #setup.load("...")
 
     # 4. create Receiver
@@ -114,6 +111,8 @@ def main():
     # 7. perform channel calibration
 
     # 8. start transmitting
+    input("Press Enter to continue...")
+
     for r in range(ROUNDS):
         setup.run()
         if(transmission_success(sender, receiver)):
