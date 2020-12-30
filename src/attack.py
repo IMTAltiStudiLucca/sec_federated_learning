@@ -20,10 +20,10 @@ class Sender(Client):
 
     # Covert channel send
     def call_training(self,n_of_epoch):
-        logging.debug("[+] Sender.call_training()")
+        logging.debug("[+] Sender: call_training()")
         # super().call_training(n_of_epoch)
         self.bit = random.choice([0,1])
-        send_to_model(bit)
+        self.send_to_model(bit)
 
     # TODO:
     def send_to_model(self, bit):
@@ -38,10 +38,10 @@ class Receiver(Client):
 
     # Covert channel receive
     def update_model_weights(self,main_model):
-        logging.debug("[+] Receiver.update_model_weights()")
+        logging.debug("[+] Receiver: update_model_weights()")
         super().update_model_weights(main_model)
         # TODO: bit can be UNDEF
-        self.bit = read_from_model()
+        self.bit = self.read_from_model()
 
     # TODO:
     def read_from_model(self):
@@ -86,4 +86,5 @@ def transmission_success():
     return False
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
     main()

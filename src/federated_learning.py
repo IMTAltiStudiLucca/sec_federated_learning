@@ -9,6 +9,7 @@ import random
 import math
 #from torch.utils.tensorboard import SummaryWriter
 from matplotlib import pyplot
+import logging
 
 from keras.datasets import mnist
 
@@ -145,6 +146,7 @@ class Setup:
 
     def add_clients(self, client):
         self.list_of_clients.append(client)
+        client.update_model_weights(self.server.main_model)
 
     def save_models(self):
         self.server.save_model(self.path)
@@ -200,8 +202,10 @@ class Server:
             c.update_model_weights(self.main_model)
 
     def training_clients(self):
+        logging.debug("[+] Server: training_clients()")
         self.selected_clients = random.sample(self.list_of_clients, math.floor(
             len(self.list_of_clients)*self.random_clients))
+        logging.debug("[+] Server: selected clients %s", self.selected_clients)
         for c in self.selected_clients:
             c.call_training(self.num_of_epochs)
 
@@ -278,6 +282,8 @@ class Client:
 
     def __init__(self, id, x_train, y_train, x_test, y_test, learning_rate=0.01,
                  num_of_epochs=10, batch_size=32, momentum=0.9, saved=False, path=None):
+
+        logging.debug("[+] Client: __init__()")
         self.id = "client_" + id
         self.learning_rate = learning_rate
         self.momentum = momentum
@@ -285,6 +291,7 @@ class Client:
         # training and test can be splitted inside the client class
         # now we are passing them while instantiate the class
 
+        logging.debug("[+] Client: x_train : %s = %s", type(x_train), x_train.shape)
         x_train, y_train, x_test, y_test = map(
             torch.tensor, (x_train, y_train, x_test, y_test))
         y_train = y_train.type(torch.LongTensor)
@@ -323,8 +330,7 @@ class Client:
 
     def call_training(self, n_of_epoch):
         train_ds = TensorDataset(self.x_train, self.y_train)
-        train_dl = DataLoader(
-            train_ds, batch_size=self.batch_size, shuffle=True)
+        train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
 
         test_ds = TensorDataset(self.x_test, self.y_test)
         test_dl = DataLoader(test_ds, batch_size=self.batch_size * 2)
