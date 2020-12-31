@@ -101,7 +101,7 @@ class Setup:
     def run(self, federated_runs=1):
         self.federated_runs = federated_runs
         for i in range(self.federated_runs):
-            logging.debug("{}th run of the federated learning".format(i))
+            logging.info("Setup: starting run of the federated learning number %s", (i+1))
             self.server.training_clients()
             self.server.update_averaged_weights()
             self.server.send_weights()
@@ -336,7 +336,7 @@ class Client:
             train_loss, train_accuracy = self.train(train_dl)
             test_loss, test_accuracy = self.validation(test_dl)
 
-            logging.info("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
+            logging.debug("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
 
     def train(self, train_dl):
         self.model.train()
