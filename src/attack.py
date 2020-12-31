@@ -37,6 +37,10 @@ class Sender(Client):
     # forces biases to transmit one bit through the model
     def send_to_model(self, bit, n_of_epoch):
 
+        x_pred = self.x_train[[bit]]
+        prediction = self.predict(x_pred)
+        logging.info("Sender: initial bias = %s", prediction[0][0])
+
         if bit == 0:
             # bias injection dataset
             train_ds = TensorDataset(self.x_train[:1], self.y_train[:1])
@@ -59,8 +63,9 @@ class Sender(Client):
             train_loss, train_accuracy = self.train(train_dl)
             test_loss, test_accuracy = self.validation(test_dl)
 
-        # NOTE: qui non vogliamo misurare l'accuracy, ma la polarizzazione rispetto al bias
-        logging.info("Sender: | epoch: {:3.0f}".format(epoch+1) + " | bias train accuracy: {:7.5f}".format(train_accuracy) + " | bias test accuracy: {:7.5f}".format(test_accuracy))
+        prediction = self.predict(x_pred)
+        logging.info("Sender: final bias = %s", prediction[0][0])
+        # logging.info("Sender: | epoch: {:3.0f}".format(epoch+1) + " | bias train accuracy: {:7.5f}".format(train_accuracy) + " | bias test accuracy: {:7.5f}".format(test_accuracy))
 
 class Receiver(Client):
 
@@ -71,6 +76,11 @@ class Receiver(Client):
         x_train = x_train.astype('float32')
         x_train /= 255
         super().__init__("Receiver",x_train, y_train, x_train, y_train)
+
+    def call_training(self,n_of_epoch):
+        logging.debug("Receiver: call_training()")
+        # Nothing to do here
+        # TODO: check if Receiver must reset the transmission channel
 
     # Covert channel receive
     def update_model_weights(self,main_model):
