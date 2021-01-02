@@ -137,7 +137,7 @@ def main():
 
     # 3. run N rounds OR load pre-trained models
     setup.run(federated_runs=1)
-    #setup.load("...")
+    #setup.load("...") 
 
     # 4. create Receiver
     receiver = Receiver(ORIGINAL, BASELINE, LABEL)
