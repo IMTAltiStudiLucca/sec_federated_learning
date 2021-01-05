@@ -3,6 +3,7 @@ import random
 import argparse
 import logging
 import numpy
+import enum
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -17,12 +18,15 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 LABEL = 0
 STABILITY_CHECKS = 3
-ROUNDS = 5
-DELTA = 0.05
+
+NTRAIN = 5 # epochs of training
+NTESTS = 5 # epochs for ground and ceiling computation
+NTRANS = 5  # epochs for transmission tests
+DELTA = 0.001
 
 hl, = plt.plot([], [])
 plt.ylim([-2, 2])
-plt.xlim([0,20])
+plt.xlim([0,100])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
@@ -31,11 +35,18 @@ def update_plot(x, y):
 def add_vline(xv):
     plt.axvline(x=xv)
 
+class ReceiverState(enum.Enum):
+    Grounding = 1
+    Ceiling = 2
+    Ready = 3
 
 class Sender(Client):
 
-    def __init__(self,x_sample,x_biased,y_label):
+    def __init__(self,x_sample,x_biased,y_label,reset):
         self.bit = None
+        self.sent = False
+        self.reset_count = 0
+        self.reset = reset
         x_train = numpy.array([x_sample,x_biased])
         y_train = numpy.array([y_label,y_label])
         x_train = x_train.astype('float32')
@@ -46,50 +57,67 @@ class Sender(Client):
     def call_training(self,n_of_epoch):
         logging.debug("Sender: call_training()")
         # super().call_training(n_of_epoch)
-        self.bit = 1 # random.choice([0,1])
-        logging.info("Sender: sending %s", self.bit)
-        self.send_to_model(self.bit, n_of_epoch)
+        self.send_to_model(n_of_epoch)
+
+    def update_model_weights(self,main_model):
+        logging.debug("Sender: update_model_weights()")
+        super().update_model_weights(main_model)
+        self.reset_count = (self.reset_count + 1) % self.reset
+        if self.reset_count == 0:
+            self.sent = False
+            logging.info("Sender: transmission frame end. Sent: %s", self.bit)
 
     # forces biases to transmit one bit through the model
     def send_to_model(self, bit, n_of_epoch):
 
-        x_pred = self.x_train[[bit]]
-        prediction = self.predict(x_pred)
-        logging.info("Sender: initial bias = %s", prediction[0][0])
+        if not self.sent:
+            self.bit = random.choice([0,1])
 
-        if bit == 0:
-            # bias injection dataset
-            train_ds = TensorDataset(self.x_train[:1], self.y_train[:1])
-            train_dl = DataLoader(train_ds, batch_size=1)
+            if self.bit == 1:
+                x_pred = self.x_train[[self.bit]]
+                prediction = self.predict(x_pred)
+                logging.info("Sender: initial bias = %s", prediction[0][0])
 
-            # bias testing dataset
-            test_ds = TensorDataset(self.x_train[:1], self.y_train[:1])
-            test_dl = DataLoader(test_ds, batch_size=1)
+                # bias injection dataset
+                train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                train_dl = DataLoader(train_ds, batch_size=1)
+
+                # bias testing dataset
+                test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                test_dl = DataLoader(test_ds, batch_size=1)
+
+                for epoch in range(n_of_epoch):
+
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
+
+                prediction = self.predict(x_pred)
+                logging.info("Sender: final bias = %s", prediction[0][0])
+            else:
+                pass
+
+            self.sent = True
         else:
-            # bias injection dataset
-            train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-            train_dl = DataLoader(train_ds, batch_size=1)
+            pass
 
-            # bias testing dataset
-            test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-            test_dl = DataLoader(test_ds, batch_size=1)
 
-        for epoch in range(n_of_epoch):
-
-            train_loss, train_accuracy = self.train(train_dl)
-            test_loss, test_accuracy = self.validation(test_dl)
-
-        prediction = self.predict(x_pred)
-        logging.info("Sender: final bias = %s", prediction[0][0])
         # logging.info("Sender: | epoch: {:3.0f}".format(epoch+1) + " | bias train accuracy: {:7.5f}".format(train_accuracy) + " | bias test accuracy: {:7.5f}".format(test_accuracy))
 
 class Receiver(Client):
 
     def __init__(self,x_sample,x_biased,y_label):
         self.bit = None
-        self.stability_checks = STABILITY_CHECKS
-        self.ready = False
-        self.baseline = 0
+        self.candidate_bit = 0
+        self.groud = 0
+        self.ground_tests = []
+        self.ceiling = 0
+        self.ceiling_pushed = False
+        self.ceiling_tests = []
+        self.transmission_threashold = 0
+        self.reset_tests = []
+        self.reset_count = 0
+        self.reset = 0
+        self.state = ReceiverState.Grounding
         self.x = 0
         x_train = numpy.array([x_sample,x_biased])
         y_train = numpy.array([y_label,y_label])
@@ -99,52 +127,112 @@ class Receiver(Client):
 
     def call_training(self,n_of_epoch):
         logging.debug("Receiver: call_training()")
-        # Nothing to do here
-        # TODO: check if Receiver must reset the transmission channel
+
+        if self.state == ReceiverState.Ceiling:
+            self.push_ceiling(n_of_epoch)
 
     # Covert channel receive
     def update_model_weights(self,main_model):
         logging.debug("Receiver: update_model_weights()")
         super().update_model_weights(main_model)
 
-        self.bit = self.read_from_model()
+        if self.state == ReceiverState.Grounding:
+            self.calc_ground()
+        elif self.state == ReceiverState.Ready:
+            self.read_from_model()
+        else:
+            self.calc_ceiling()
 
-    # TODO: for now only checks a fixed delta
-    def read_from_model(self):
-        # Test if a bias exists in the model
-
+    def bias_prediction(self):
         x_pred = self.x_train[[1]]
         prediction = self.predict(x_pred)
-        logging.info("Receiver: received model bias = %s", prediction[0][0])
+        return prediction[0][0]
 
-        update_plot(self.x, prediction[0][0])
+    def read_from_model(self):
+
+        pred = self.bias_prediction()
+
+        update_plot(self.x, pred)
         self.x += 1
 
-        bit = None
-        if not self.ready:
-            if prediction[0][0] - DELTA < self.baseline < prediction[0][0] + DELTA:
-                logging.info("Receiver: stable turn")
-                self.stability_checks -= 1
-                if self.stability_checks <= 0:
-                    logging.info("Receiver: ready for transmission")
-                    self.ready = True
-                    add_vline(self.x)
+        logging.info("Receiver: prediction = %s", pred)
+
+        self.reset_count += 1
+
+        if pred > self.transmission_threashold:
+            self.candidate_bit = 1
+
+        if self.reset_count >= self.reset:
+            self.bit = self.candidate_bit
+            self.candidate_bit = 0
+            self.reset_count = 0
+            logging.info("Receiver: transmission frame end. Received: %s", self.bit)
+
+    def calc_ground(self):
+
+        pred = self.bias_prediction()
+
+        update_plot(self.x, pred)
+        self.x += 1
+
+        logging.info("Receiver: prediction = %s", pred)
+
+        self.ground_tests.append(pred)
+
+        if len(self.ground_tests) > NTESTS:
+            self.ground = sum(self.ground_tests) / len(self.ground_tests)
+            self.state = ReceiverState.Ceiling
+            add_vline(self.x)
+            logging.info("Receiver: Ground = %s", self.ground)
+
+    def push_ceiling(self, n_of_epoch):
+        if not self.ceiling_pushed:
+            # bias injection dataset
+            train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+            train_dl = DataLoader(train_ds, batch_size=1)
+
+            # bias testing dataset
+            test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+            test_dl = DataLoader(test_ds, batch_size=1)
+
+            for epoch in range(n_of_epoch):
+                train_loss, train_accuracy = self.train(train_dl)
+                test_loss, test_accuracy = self.validation(test_dl)
+
+            self.ceiling_pushed = True
+
+    def calc_ceiling(self):
+
+        pred = self.bias_prediction()
+
+        update_plot(self.x, pred)
+        self.x += 1
+
+        logging.info("Receiver: prediction = %s", pred)
+
+        if self.ceiling_pushed:
+
+            if self.ground + DELTA > pred > self.ground - DELTA:
+                logging.debug("Receiver: reset test: %s", (self.reset_count + 1))
+                self.reset_tests.append(self.reset_count + 1)
+                self.reset_count = 0
+                self.ceiling_pushed = False
+            elif self.reset_count == 0:
+                logging.debug("Receiver: ceiling test: %s", pred)
+                self.ceiling_tests.append(pred)
+                self.reset_count += 1
             else:
-                self.stability_checks = STABILITY_CHECKS
+                self.reset_count += 1
 
-            self.baseline = prediction[0][0]
-        else:
-            if prediction[0][0] > self.baseline + DELTA:
-                bit = 1
-                logging.info("Receiver: 1 received")
-            else:
-                logging.info("Receiver: nothing received")
-#            else:
-#                bit = 0
-#                logging.info("Receiver: 0 received")
-
-        return bit
-
+            if len(self.ceiling_tests) > NTESTS:
+                self.ceiling = sum(self.ceiling_tests) / len(self.ceiling_tests)
+                self.reset = sum(self.reset_tests) / len(self.reset_tests)
+                self.transmission_threashold = (self.ceiling + self.groud)/2
+                self.state = ReceiverState.Ready
+                add_vline(self.x)
+                logging.info("Receiver: Ceiling    = %s", self.ceiling)
+                logging.info("Receiver: Reset      = %s", self.reset)
+                logging.info("Receiver: Threashold = %s", self.transmission_threashold)
 
 def main():
     # 1. parse arguments
@@ -156,7 +244,7 @@ def main():
     setup = Setup(args.conf_file)
 
     # 3. run N rounds OR load pre-trained models
-    setup.run(federated_runs=1)
+    setup.run(federated_runs=NTRAIN)
     #setup.load("...")
 
     # 4. create Receiver
@@ -165,19 +253,19 @@ def main():
 
     # 5. compute channel baseline
     # baseline = receiver.compute_baseline()
-    while not receiver.ready:
+    while not receiver.state == ReceiverState.Ready:
         setup.run(federated_runs=1)
 
     # 6. create sender
-    sender = Sender(ORIGINAL, BASELINE, LABEL)
+    sender = Sender(ORIGINAL, BASELINE, LABEL,receive.reset)
     setup.add_clients(sender)
 
     # 7. perform channel calibration
 
     # 8. start transmitting
-
-    for r in range(ROUNDS):
-        setup.run(federated_runs=1)
+    for r in range(NTRANS):
+        logging.inf("Attacker: starting transmission frame")
+        setup.run(federated_runs=receiver.reset)
         check_transmission_success(sender, receiver)
 
     plt.savefig('output.png')
