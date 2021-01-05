@@ -19,10 +19,10 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 LABEL = 0
 STABILITY_CHECKS = 3
 
-NTRAIN = 5 # epochs of training
-NTESTS = 5 # epochs for ground and ceiling computation
+NTRAIN = 50 # epochs of training
+NTESTS = 10 # epochs for ground and ceiling computation
 NTRANS = 5  # epochs for transmission tests
-DELTA = 0.001
+DELTA = 0.01
 
 hl, = plt.plot([], [])
 plt.ylim([-2, 2])
@@ -155,7 +155,7 @@ class Receiver(Client):
         update_plot(self.x, pred)
         self.x += 1
 
-        logging.info("Receiver: prediction = %s", pred)
+        logging.info("Receiver: read prediction = %s", pred)
 
         self.reset_count += 1
 
@@ -175,7 +175,7 @@ class Receiver(Client):
         update_plot(self.x, pred)
         self.x += 1
 
-        logging.info("Receiver: prediction = %s", pred)
+        logging.info("Receiver: grnd prediction = %s", pred)
 
         self.ground_tests.append(pred)
 
@@ -186,7 +186,10 @@ class Receiver(Client):
             logging.info("Receiver: Ground = %s", self.ground)
 
     def push_ceiling(self, n_of_epoch):
+
         if not self.ceiling_pushed:
+
+            logging.info("Receiver: push_ceiling()")
             # bias injection dataset
             train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
             train_dl = DataLoader(train_ds, batch_size=1)
@@ -208,7 +211,7 @@ class Receiver(Client):
         update_plot(self.x, pred)
         self.x += 1
 
-        logging.info("Receiver: prediction = %s", pred)
+        logging.info("Receiver: ceil prediction = %s", pred)
 
         if self.ceiling_pushed:
 
