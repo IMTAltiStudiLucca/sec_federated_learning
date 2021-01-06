@@ -122,7 +122,7 @@ def showcase(image):
     print("OTHER PICTURE OVERLAY (alpha = 0.2)")
     print_digit(baseline_overlay_mask(image,shifted, .2))
 
-if __name__ == "__main__":
+def dotted_zero():
     image = io.load_idx("../data/train-images-idx3-ubyte.gz")[56]
     print(linearize(image))
     image = baseline_set_pixel(image, 255, 16, 16)
@@ -131,3 +131,43 @@ if __name__ == "__main__":
     image = baseline_set_pixel(image, 255, 15, 15)
     print(linearize(image))
     print_digit(image)
+
+def slashed_zero():
+    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[56]
+    print(linearize(image))
+    image = baseline_set_pixel(image, 255, 10, 19)
+    image = baseline_set_pixel(image, 255, 11, 18)
+    image = baseline_set_pixel(image, 255, 12, 17)
+    image = baseline_set_pixel(image, 255, 13, 16)
+    image = baseline_set_pixel(image, 255, 14, 15)
+    image = baseline_set_pixel(image, 255, 15, 14)
+    image = baseline_set_pixel(image, 255, 16, 13)
+    image = baseline_set_pixel(image, 255, 17, 12)
+    image = baseline_set_pixel(image, 255, 18, 11)
+    image = baseline_set_pixel(image, 255, 19, 10)
+    image = baseline_set_pixel(image, 255, 11, 19)
+    image = baseline_set_pixel(image, 255, 12, 18)
+    image = baseline_set_pixel(image, 255, 13, 17)
+    image = baseline_set_pixel(image, 255, 14, 16)
+    image = baseline_set_pixel(image, 255, 15, 15)
+    image = baseline_set_pixel(image, 255, 16, 14)
+    image = baseline_set_pixel(image, 255, 17, 13)
+    image = baseline_set_pixel(image, 255, 18, 12)
+    image = baseline_set_pixel(image, 255, 19, 11)
+    image = baseline_set_pixel(image, 255, 20, 10)
+    image = baseline_set_pixel(image, 255, 12, 19)
+    image = baseline_set_pixel(image, 255, 13, 18)
+    image = baseline_set_pixel(image, 255, 14, 17)
+    image = baseline_set_pixel(image, 255, 15, 16)
+    image = baseline_set_pixel(image, 255, 16, 15)
+    image = baseline_set_pixel(image, 255, 17, 14)
+    image = baseline_set_pixel(image, 255, 18, 13)
+    image = baseline_set_pixel(image, 255, 19, 12)
+    image = baseline_set_pixel(image, 255, 20, 11)
+    image = baseline_set_pixel(image, 255, 21, 10)
+
+    print(linearize(image))
+    print_digit(image)
+
+if __name__ == "__main__":
+    slashed_zero()

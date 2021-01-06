@@ -7,7 +7,8 @@ import enum
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-
+import signal
+import sys
 
 
 # Just a 0
@@ -16,13 +17,13 @@ ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 # The same 0 with a central dot
 BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 105, 220, 254, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 166, 233, 253, 253, 253, 236, 209, 209, 209, 77, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 172, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 238, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 253, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 238, 253, 253, 253, 253, 253, 253, 179, 196, 253, 253, 253, 253, 238, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 253, 253, 253, 253, 253, 248, 134, 0, 18, 83, 237, 253, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 164, 253, 253, 253, 253, 253, 128, 0, 0, 0, 0, 57, 119, 214, 253, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 248, 253, 253, 253, 126, 14, 4, 0, 0, 0, 0, 0, 0, 179, 253, 248, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175, 253, 253, 240, 190, 28, 0, 0, 0, 0, 0, 0, 0, 0, 179, 253, 253, 173, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 211, 254, 254, 179, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 135, 255, 209, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 90, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 134, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 142, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 214, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 165, 253, 253, 253, 215, 36, 0, 0, 0, 0, 0, 0, 0, 0, 163, 253, 253, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 172, 253, 253, 253, 214, 127, 7, 0, 0, 0, 0, 0, 72, 232, 253, 171, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 182, 253, 253, 253, 253, 162, 56, 0, 0, 0, 64, 240, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 173, 253, 253, 253, 253, 245, 241, 239, 239, 246, 253, 225, 14, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 59, 138, 224, 253, 253, 254, 253, 253, 253, 240, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 104, 192, 255, 253, 253, 182, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-LABEL = 0
+LABEL = 7
 STABILITY_CHECKS = 3
 
-NTRAIN = 50 # epochs of training
+NTRAIN = 5 # epochs of training
 NTESTS = 10 # epochs for ground and ceiling computation
 NTRANS = 5  # epochs for transmission tests
-DELTA = 0.01
+DELTA = 0.1
 
 hl, = plt.plot([], [])
 plt.ylim([-2, 2])
@@ -34,6 +35,12 @@ def update_plot(x, y):
 
 def add_vline(xv):
     plt.axvline(x=xv)
+
+def signal_handler(sig, frame):
+    plt.savefig('output.png')
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 class ReceiverState(enum.Enum):
     Grounding = 1
@@ -67,6 +74,11 @@ class Sender(Client):
             self.sent = False
             logging.info("Sender: transmission frame end. Sent: %s", self.bit)
 
+    def bias_prediction(self):
+        x_pred = self.x_train[[1]]
+        prediction = self.predict(x_pred)
+        return prediction[0][LABEL]
+
     # forces biases to transmit one bit through the model
     def send_to_model(self, bit, n_of_epoch):
 
@@ -74,9 +86,9 @@ class Sender(Client):
             self.bit = random.choice([0,1])
 
             if self.bit == 1:
-                x_pred = self.x_train[[self.bit]]
-                prediction = self.predict(x_pred)
-                logging.info("Sender: initial bias = %s", prediction[0][0])
+
+                prediction = self.bias_prediction()
+                logging.info("Sender: initial bias = %s", prediction)
 
                 # bias injection dataset
                 train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
@@ -92,16 +104,13 @@ class Sender(Client):
                     test_loss, test_accuracy = self.validation(test_dl)
 
                 prediction = self.predict(x_pred)
-                logging.info("Sender: final bias = %s", prediction[0][0])
+                logging.info("Sender: final bias = %s", prediction)
             else:
                 pass
 
             self.sent = True
         else:
             pass
-
-
-        # logging.info("Sender: | epoch: {:3.0f}".format(epoch+1) + " | bias train accuracy: {:7.5f}".format(train_accuracy) + " | bias test accuracy: {:7.5f}".format(test_accuracy))
 
 class Receiver(Client):
 
@@ -118,7 +127,6 @@ class Receiver(Client):
         self.reset_count = 0
         self.reset = 0
         self.state = ReceiverState.Grounding
-        self.x = 0
         x_train = numpy.array([x_sample,x_biased])
         y_train = numpy.array([y_label,y_label])
         x_train = x_train.astype('float32')
@@ -146,14 +154,11 @@ class Receiver(Client):
     def bias_prediction(self):
         x_pred = self.x_train[[1]]
         prediction = self.predict(x_pred)
-        return prediction[0][0]
+        return prediction[0][LABEL]
 
     def read_from_model(self):
 
         pred = self.bias_prediction()
-
-        update_plot(self.x, pred)
-        self.x += 1
 
         logging.info("Receiver: read prediction = %s", pred)
 
@@ -172,9 +177,6 @@ class Receiver(Client):
 
         pred = self.bias_prediction()
 
-        update_plot(self.x, pred)
-        self.x += 1
-
         logging.info("Receiver: grnd prediction = %s", pred)
 
         self.ground_tests.append(pred)
@@ -182,14 +184,13 @@ class Receiver(Client):
         if len(self.ground_tests) > NTESTS:
             self.ground = sum(self.ground_tests) / len(self.ground_tests)
             self.state = ReceiverState.Ceiling
-            add_vline(self.x)
             logging.info("Receiver: Ground = %s", self.ground)
 
     def push_ceiling(self, n_of_epoch):
 
         if not self.ceiling_pushed:
 
-            logging.info("Receiver: push_ceiling()")
+            logging.info("Receiver: push_ceiling")
             # bias injection dataset
             train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
             train_dl = DataLoader(train_ds, batch_size=1)
@@ -207,9 +208,6 @@ class Receiver(Client):
     def calc_ceiling(self):
 
         pred = self.bias_prediction()
-
-        update_plot(self.x, pred)
-        self.x += 1
 
         logging.info("Receiver: ceil prediction = %s", pred)
 
@@ -232,10 +230,73 @@ class Receiver(Client):
                 self.reset = sum(self.reset_tests) / len(self.reset_tests)
                 self.transmission_threashold = (self.ceiling + self.groud)/2
                 self.state = ReceiverState.Ready
-                add_vline(self.x)
                 logging.info("Receiver: Ceiling    = %s", self.ceiling)
                 logging.info("Receiver: Reset      = %s", self.reset)
                 logging.info("Receiver: Threashold = %s", self.transmission_threashold)
+
+class Observer(Client):
+
+    def __init__(self,x_sample,x_biased,y_label):
+        self.sent = False
+        self.x = 0
+        x_train = numpy.array([x_sample,x_biased])
+        y_train = numpy.array([y_label,y_label])
+        x_train = x_train.astype('float32')
+        x_train /= 255
+        super().__init__("Observer",x_train, y_train, x_train, y_train)
+
+    # Covert channel send
+    def call_training(self,n_of_epoch):
+        pass
+
+    def update_model_weights(self,main_model):
+        logging.debug("Observer: update_model_weights()")
+        super().update_model_weights(main_model)
+        pred = self.bias_prediction()
+
+        logging.info("Observer: global prediction = %s", pred)
+
+        update_plot(self.x, pred)
+        self.x += 1
+
+
+    def bias_prediction(self):
+        x_pred = self.x_train[[1]]
+        prediction = self.predict(x_pred)
+        return prediction[0][LABEL]
+
+    # forces biases to transmit one bit through the model
+    def send_to_model(self, bit, n_of_epoch):
+
+        if not self.sent:
+            self.bit = random.choice([0,1])
+
+            if self.bit == 1:
+
+                prediction = self.bias_prediction()
+                logging.info("Sender: initial bias = %s", prediction)
+
+                # bias injection dataset
+                train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                train_dl = DataLoader(train_ds, batch_size=1)
+
+                # bias testing dataset
+                test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                test_dl = DataLoader(test_ds, batch_size=1)
+
+                for epoch in range(n_of_epoch):
+
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
+
+                prediction = self.predict(x_pred)
+                logging.info("Sender: final bias = %s", prediction)
+            else:
+                pass
+
+            self.sent = True
+        else:
+            pass
 
 def main():
     # 1. parse arguments
@@ -245,6 +306,10 @@ def main():
 
     # 2. create Setup
     setup = Setup(args.conf_file)
+
+    # 2.1. add observer
+    observer = Observer(ORIGINAL, BASELINE, LABEL)
+    setup.add_clients(observer)
 
     # 3. run N rounds OR load pre-trained models
     setup.run(federated_runs=NTRAIN)
@@ -270,8 +335,6 @@ def main():
         logging.inf("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.reset)
         check_transmission_success(sender, receiver)
-
-    plt.savefig('output.png')
 
 def check_transmission_success(s, r):
     if s.bit != None:
