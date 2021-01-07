@@ -1,0 +1,439 @@
+[+] INFO: Observer: global prediction = tensor(0.1059)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.2915)
+[+] INFO: Setup: starting run of the federated learning number 2
+[+] INFO: Observer: global prediction = tensor(0.4188)
+[+] INFO: Setup: starting run of the federated learning number 3
+[+] INFO: Observer: global prediction = tensor(0.6082)
+[+] INFO: Setup: starting run of the federated learning number 4
+[+] INFO: Observer: global prediction = tensor(0.6912)
+[+] INFO: Setup: starting run of the federated learning number 5
+[+] INFO: Observer: global prediction = tensor(0.7806)
+[+] INFO: Setup: starting run of the federated learning number 6
+[+] INFO: Observer: global prediction = tensor(0.7753)
+[+] INFO: Setup: starting run of the federated learning number 7
+[+] INFO: Observer: global prediction = tensor(0.7314)
+[+] INFO: Setup: starting run of the federated learning number 8
+[+] INFO: Observer: global prediction = tensor(0.6894)
+[+] INFO: Setup: starting run of the federated learning number 9
+[+] INFO: Observer: global prediction = tensor(0.7278)
+[+] INFO: Setup: starting run of the federated learning number 10
+[+] INFO: Observer: global prediction = tensor(0.7214)
+[+] INFO: Setup: starting run of the federated learning number 11
+[+] INFO: Observer: global prediction = tensor(0.7472)
+[+] INFO: Setup: starting run of the federated learning number 12
+[+] INFO: Observer: global prediction = tensor(0.7600)
+[+] INFO: Setup: starting run of the federated learning number 13
+[+] INFO: Observer: global prediction = tensor(0.7450)
+[+] INFO: Setup: starting run of the federated learning number 14
+[+] INFO: Observer: global prediction = tensor(0.7990)
+[+] INFO: Setup: starting run of the federated learning number 15
+[+] INFO: Observer: global prediction = tensor(0.7851)
+[+] INFO: Setup: starting run of the federated learning number 16
+[+] INFO: Observer: global prediction = tensor(0.7646)
+[+] INFO: Setup: starting run of the federated learning number 17
+[+] INFO: Observer: global prediction = tensor(0.7633)
+[+] INFO: Setup: starting run of the federated learning number 18
+[+] INFO: Observer: global prediction = tensor(0.7537)
+[+] INFO: Setup: starting run of the federated learning number 19
+[+] INFO: Observer: global prediction = tensor(0.7524)
+[+] INFO: Setup: starting run of the federated learning number 20
+[+] INFO: Observer: global prediction = tensor(0.7563)
+[+] INFO: Setup: starting run of the federated learning number 21
+[+] INFO: Observer: global prediction = tensor(0.7688)
+[+] INFO: Setup: starting run of the federated learning number 22
+[+] INFO: Observer: global prediction = tensor(0.7965)
+[+] INFO: Setup: starting run of the federated learning number 23
+[+] INFO: Observer: global prediction = tensor(0.8419)
+[+] INFO: Setup: starting run of the federated learning number 24
+[+] INFO: Observer: global prediction = tensor(0.8175)
+[+] INFO: Setup: starting run of the federated learning number 25
+[+] INFO: Observer: global prediction = tensor(0.7873)
+[+] INFO: Setup: starting run of the federated learning number 26
+[+] INFO: Observer: global prediction = tensor(0.7313)
+[+] INFO: Setup: starting run of the federated learning number 27
+[+] INFO: Observer: global prediction = tensor(0.7898)
+[+] INFO: Setup: starting run of the federated learning number 28
+[+] INFO: Observer: global prediction = tensor(0.8298)
+[+] INFO: Setup: starting run of the federated learning number 29
+[+] INFO: Observer: global prediction = tensor(0.8330)
+[+] INFO: Setup: starting run of the federated learning number 30
+[+] INFO: Observer: global prediction = tensor(0.8323)
+[+] INFO: Setup: starting run of the federated learning number 31
+[+] INFO: Observer: global prediction = tensor(0.8608)
+[+] INFO: Setup: starting run of the federated learning number 32
+[+] INFO: Observer: global prediction = tensor(0.7994)
+[+] INFO: Setup: starting run of the federated learning number 33
+[+] INFO: Observer: global prediction = tensor(0.7985)
+[+] INFO: Setup: starting run of the federated learning number 34
+[+] INFO: Observer: global prediction = tensor(0.7848)
+[+] INFO: Setup: starting run of the federated learning number 35
+[+] INFO: Observer: global prediction = tensor(0.8341)
+[+] INFO: Setup: starting run of the federated learning number 36
+[+] INFO: Observer: global prediction = tensor(0.8484)
+[+] INFO: Setup: starting run of the federated learning number 37
+[+] INFO: Observer: global prediction = tensor(0.8171)
+[+] INFO: Setup: starting run of the federated learning number 38
+[+] INFO: Observer: global prediction = tensor(0.7863)
+[+] INFO: Setup: starting run of the federated learning number 39
+[+] INFO: Observer: global prediction = tensor(0.7722)
+[+] INFO: Setup: starting run of the federated learning number 40
+[+] INFO: Observer: global prediction = tensor(0.8039)
+[+] INFO: Setup: starting run of the federated learning number 41
+[+] INFO: Observer: global prediction = tensor(0.7996)
+[+] INFO: Setup: starting run of the federated learning number 42
+[+] INFO: Observer: global prediction = tensor(0.7903)
+[+] INFO: Setup: starting run of the federated learning number 43
+[+] INFO: Observer: global prediction = tensor(0.8286)
+[+] INFO: Setup: starting run of the federated learning number 44
+[+] INFO: Observer: global prediction = tensor(0.8048)
+[+] INFO: Setup: starting run of the federated learning number 45
+[+] INFO: Observer: global prediction = tensor(0.7780)
+[+] INFO: Setup: starting run of the federated learning number 46
+[+] INFO: Observer: global prediction = tensor(0.7971)
+[+] INFO: Setup: starting run of the federated learning number 47
+[+] INFO: Observer: global prediction = tensor(0.8055)
+[+] INFO: Setup: starting run of the federated learning number 48
+[+] INFO: Observer: global prediction = tensor(0.8285)
+[+] INFO: Setup: starting run of the federated learning number 49
+[+] INFO: Observer: global prediction = tensor(0.8315)
+[+] INFO: Setup: starting run of the federated learning number 50
+[+] INFO: Observer: global prediction = tensor(0.8008)
+[+] INFO: Receiver: grnd prediction = tensor(0.7061)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8131)
+[+] INFO: Receiver: grnd prediction = tensor(0.7120)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8151)
+[+] INFO: Receiver: grnd prediction = tensor(0.7308)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8242)
+[+] INFO: Receiver: grnd prediction = tensor(0.7343)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8263)
+[+] INFO: Receiver: grnd prediction = tensor(0.7310)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8441)
+[+] INFO: Receiver: grnd prediction = tensor(0.7311)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8360)
+[+] INFO: Receiver: grnd prediction = tensor(0.7549)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8259)
+[+] INFO: Receiver: grnd prediction = tensor(0.7647)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8260)
+[+] INFO: Receiver: grnd prediction = tensor(0.7773)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8458)
+[+] INFO: Receiver: grnd prediction = tensor(0.7363)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8642)
+[+] INFO: Receiver: grnd prediction = tensor(0.7448)
+[+] INFO: Receiver: Ground = tensor(0.7385)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8660)
+[+] INFO: Receiver: ceil prediction = tensor(0.7349)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Receiver: push_ceiling
+[+] INFO: Observer: global prediction = tensor(0.9086)
+[+] INFO: Receiver: ceil prediction = tensor(40.6595)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9245)
+[+] INFO: Receiver: ceil prediction = tensor(40.1691)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.8955)
+[+] INFO: Receiver: ceil prediction = tensor(39.9749)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9019)
+[+] INFO: Receiver: ceil prediction = tensor(40.2575)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9076)
+[+] INFO: Receiver: ceil prediction = tensor(40.3952)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9196)
+[+] INFO: Receiver: ceil prediction = tensor(40.6428)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9285)
+[+] INFO: Receiver: ceil prediction = tensor(40.9275)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9370)
+[+] INFO: Receiver: ceil prediction = tensor(41.0583)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9259)
+[+] INFO: Receiver: ceil prediction = tensor(41.1223)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9357)
+[+] INFO: Receiver: ceil prediction = tensor(41.2170)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9410)
+[+] INFO: Receiver: ceil prediction = tensor(41.4373)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9407)
+[+] INFO: Receiver: ceil prediction = tensor(41.5264)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9469)
+[+] INFO: Receiver: ceil prediction = tensor(41.7716)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9422)
+[+] INFO: Receiver: ceil prediction = tensor(41.7257)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9443)
+[+] INFO: Receiver: ceil prediction = tensor(41.8581)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9386)
+[+] INFO: Receiver: ceil prediction = tensor(41.8666)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9392)
+[+] INFO: Receiver: ceil prediction = tensor(41.9885)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9425)
+[+] INFO: Receiver: ceil prediction = tensor(42.0751)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9495)
+[+] INFO: Receiver: ceil prediction = tensor(42.2453)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9626)
+[+] INFO: Receiver: ceil prediction = tensor(42.3956)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9617)
+[+] INFO: Receiver: ceil prediction = tensor(42.4417)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9553)
+[+] INFO: Receiver: ceil prediction = tensor(42.4378)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9588)
+[+] INFO: Receiver: ceil prediction = tensor(42.5735)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9684)
+[+] INFO: Receiver: ceil prediction = tensor(42.7259)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9679)
+[+] INFO: Receiver: ceil prediction = tensor(42.7831)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9710)
+[+] INFO: Receiver: ceil prediction = tensor(42.8251)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9681)
+[+] INFO: Receiver: ceil prediction = tensor(42.9266)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9750)
+[+] INFO: Receiver: ceil prediction = tensor(43.0074)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9803)
+[+] INFO: Receiver: ceil prediction = tensor(43.1024)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9831)
+[+] INFO: Receiver: ceil prediction = tensor(43.1587)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9733)
+[+] INFO: Receiver: ceil prediction = tensor(43.0999)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9750)
+[+] INFO: Receiver: ceil prediction = tensor(43.1193)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9765)
+[+] INFO: Receiver: ceil prediction = tensor(43.2489)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9817)
+[+] INFO: Receiver: ceil prediction = tensor(43.2768)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9815)
+[+] INFO: Receiver: ceil prediction = tensor(43.3509)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9770)
+[+] INFO: Receiver: ceil prediction = tensor(43.3092)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9810)
+[+] INFO: Receiver: ceil prediction = tensor(43.4123)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9758)
+[+] INFO: Receiver: ceil prediction = tensor(43.4422)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9755)
+[+] INFO: Receiver: ceil prediction = tensor(43.4807)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9793)
+[+] INFO: Receiver: ceil prediction = tensor(43.5864)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9822)
+[+] INFO: Receiver: ceil prediction = tensor(43.6418)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9864)
+[+] INFO: Receiver: ceil prediction = tensor(43.7084)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9914)
+[+] INFO: Receiver: ceil prediction = tensor(43.7634)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9873)
+[+] INFO: Receiver: ceil prediction = tensor(43.7925)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9887)
+[+] INFO: Receiver: ceil prediction = tensor(43.7814)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9941)
+[+] INFO: Receiver: ceil prediction = tensor(43.8483)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9921)
+[+] INFO: Receiver: ceil prediction = tensor(43.8563)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9893)
+[+] INFO: Receiver: ceil prediction = tensor(43.8579)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9966)
+[+] INFO: Receiver: ceil prediction = tensor(44.0134)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9983)
+[+] INFO: Receiver: ceil prediction = tensor(44.0585)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0038)
+[+] INFO: Receiver: ceil prediction = tensor(44.1254)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0020)
+[+] INFO: Receiver: ceil prediction = tensor(44.1935)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0011)
+[+] INFO: Receiver: ceil prediction = tensor(44.2610)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(0.9967)
+[+] INFO: Receiver: ceil prediction = tensor(44.2415)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0028)
+[+] INFO: Receiver: ceil prediction = tensor(44.2649)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0029)
+[+] INFO: Receiver: ceil prediction = tensor(44.3604)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0007)
+[+] INFO: Receiver: ceil prediction = tensor(44.3417)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0027)
+[+] INFO: Receiver: ceil prediction = tensor(44.4419)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0060)
+[+] INFO: Receiver: ceil prediction = tensor(44.4680)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0026)
+[+] INFO: Receiver: ceil prediction = tensor(44.4943)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0072)
+[+] INFO: Receiver: ceil prediction = tensor(44.5074)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0098)
+[+] INFO: Receiver: ceil prediction = tensor(44.5992)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0114)
+[+] INFO: Receiver: ceil prediction = tensor(44.6352)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0101)
+[+] INFO: Receiver: ceil prediction = tensor(44.6338)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0083)
+[+] INFO: Receiver: ceil prediction = tensor(44.6732)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0097)
+[+] INFO: Receiver: ceil prediction = tensor(44.7819)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0181)
+[+] INFO: Receiver: ceil prediction = tensor(44.8065)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0136)
+[+] INFO: Receiver: ceil prediction = tensor(44.8322)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0165)
+[+] INFO: Receiver: ceil prediction = tensor(44.8881)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0141)
+[+] INFO: Receiver: ceil prediction = tensor(44.9253)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0167)
+[+] INFO: Receiver: ceil prediction = tensor(44.9559)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0180)
+[+] INFO: Receiver: ceil prediction = tensor(44.9757)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0196)
+[+] INFO: Receiver: ceil prediction = tensor(45.0144)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0202)
+[+] INFO: Receiver: ceil prediction = tensor(45.0413)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0257)
+[+] INFO: Receiver: ceil prediction = tensor(45.1293)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0235)
+[+] INFO: Receiver: ceil prediction = tensor(45.1419)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0256)
+[+] INFO: Receiver: ceil prediction = tensor(45.1738)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0294)
+[+] INFO: Receiver: ceil prediction = tensor(45.2103)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0275)
+[+] INFO: Receiver: ceil prediction = tensor(45.2033)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0287)
+[+] INFO: Receiver: ceil prediction = tensor(45.2552)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0286)
+[+] INFO: Receiver: ceil prediction = tensor(45.2945)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0303)
+[+] INFO: Receiver: ceil prediction = tensor(45.3333)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0325)
+[+] INFO: Receiver: ceil prediction = tensor(45.3924)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0356)
+[+] INFO: Receiver: ceil prediction = tensor(45.4237)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0348)
+[+] INFO: Receiver: ceil prediction = tensor(45.4252)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0363)
+[+] INFO: Receiver: ceil prediction = tensor(45.4665)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0344)
+[+] INFO: Receiver: ceil prediction = tensor(45.5193)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0372)
+[+] INFO: Receiver: ceil prediction = tensor(45.5402)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0400)
+[+] INFO: Receiver: ceil prediction = tensor(45.5703)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0413)
+[+] INFO: Receiver: ceil prediction = tensor(45.6245)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0425)
+[+] INFO: Receiver: ceil prediction = tensor(45.6069)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0370)
+[+] INFO: Receiver: ceil prediction = tensor(45.5832)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0356)
+[+] INFO: Receiver: ceil prediction = tensor(45.5951)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0376)
+[+] INFO: Receiver: ceil prediction = tensor(45.6526)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0422)
+[+] INFO: Receiver: ceil prediction = tensor(45.7142)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0421)
+[+] INFO: Receiver: ceil prediction = tensor(45.7234)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0427)
+[+] INFO: Receiver: ceil prediction = tensor(45.7483)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0390)
+[+] INFO: Receiver: ceil prediction = tensor(45.7323)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0388)
+[+] INFO: Receiver: ceil prediction = tensor(45.7469)
+[+] INFO: Setup: starting run of the federated learning number 1
+[+] INFO: Observer: global prediction = tensor(1.0432)
+[+] INFO: Receiver: ceil prediction = tensor(45.8582)
+[+] INFO: Setup: starting run of the federated learning number 1
+
