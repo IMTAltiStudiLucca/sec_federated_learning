@@ -20,9 +20,9 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 LABEL = 0
 STABILITY_CHECKS = 3
 
-NTRAIN = 50 # epochs of training
-NTESTS = 10 # epochs for ground and ceiling computation
-NTRANS = 5  # epochs for transmission tests
+NTRAIN = 1  # rounds of training
+NTESTS = 10 # rounds for ground and ceiling computation
+NTRANS = 5  # rounds for transmission tests
 DELTA = 0.1
 
 hl, = plt.plot([], [])
@@ -298,6 +298,11 @@ class Observer(Client):
         else:
             pass
 
+def global_bias_prediction(server, client):
+    x_pred = client.x_train[[1]]
+    prediction = server.predict(x_pred)
+    return prediction[0][LABEL]
+
 def main():
     # 1. parse arguments
     parser = argparse.ArgumentParser()
@@ -323,6 +328,8 @@ def main():
     # baseline = receiver.compute_baseline()
     while not receiver.state == ReceiverState.Ready:
         setup.run(federated_runs=1)
+        pred = global_bias_prediction(setup.server, observer)
+        logging.info("SERVER: global prediction = %s", pred)
 
     # 6. create sender
     sender = Sender(ORIGINAL, BASELINE, LABEL,receive.reset)
