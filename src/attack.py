@@ -142,6 +142,7 @@ class Receiver(Client):
             self.push_ceiling(n_of_epoch)
         else:
             if not self.reply_model is None:
+                logging.info("Receiver: sending reply model")
                 self.model = self.reply_model.clone()
 
     # Covert channel receive
