@@ -49,6 +49,16 @@ class Net2nn(nn.Module):
         x = self.fc3(x)
         return x
 
+    def clone(self):
+        model_clone = Net2nn()
+        model_clone.fc1.weight.data = self.fc1.weight.data.clone()
+        model_clone.fc2.weight.data = self.fc2.weight.data.clone()
+        model_clone.fc3.weight.data = self.fc3.weight.data.clone()
+        model_clone.fc1.bias.data = self.fc1.bias.data.clone()
+        model_clone.fc2.bias.data = self.fc2.bias.data.clone()
+        model_clone.fc3.bias.data = self.fc3.bias.data.clone()
+        return model_clone
+
 
 class Setup:
     '''Read the dataset, instantiate the clients and the server
