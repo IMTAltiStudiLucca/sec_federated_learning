@@ -320,6 +320,7 @@ class Client:
         with torch.no_grad():
             self.model.fc1.weight.data = main_model.fc1.weight.data.clone()
             self.model.fc2.weight.data = main_model.fc2.weight.data.clone()
+            self.model.fc3.weight.data = main_model.fc3.weight.data.clone()
             self.model.fc1.bias.data = main_model.fc1.bias.data.clone()
             self.model.fc2.bias.data = main_model.fc2.bias.data.clone()
             self.model.fc3.bias.data = main_model.fc3.bias.data.clone()
