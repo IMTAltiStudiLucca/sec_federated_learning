@@ -129,8 +129,10 @@ class Receiver(Client):
         logging.debug("Receiver: call_training()")
 
         if self.state == ReceiverState.Ready and not self.replay_model is None:
-            logging.info("Receiver: sending replay model")
-            self.model = self.replay_model.clone()
+            # Not necessary
+            # logging.info("Receiver: sending replay model")
+            # self.model = self.replay_model.clone()
+            pass
         else:
             self.selection_count += 1
             logging.info("Receiver: selected %s times", self.selection_count)
@@ -276,6 +278,7 @@ def main():
         successful_transmissions += check_transmission_success(sender, receiver)
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
+    plt.savefig('output.png', dpi=300)
 
 def check_transmission_success(s, r):
     result = 0
