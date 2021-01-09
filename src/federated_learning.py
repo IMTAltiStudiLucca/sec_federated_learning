@@ -108,8 +108,9 @@ class Setup:
             settings = yaml.load(f, Loader=yaml.FullLoader)
             return settings
 
-    def run(self, federated_runs=1):
-        self.federated_runs = federated_runs
+    def run(self, federated_runs = None ):
+        if federated_runs != None:
+            self.federated_runs = federated_runs
         for i in range(self.federated_runs):
             logging.info("Setup: starting run of the federated learning number %s", (i+1))
             self.server.training_clients()
@@ -336,6 +337,7 @@ class Client:
             self.model.fc3.bias.data = main_model.fc3.bias.data.clone()
 
     def call_training(self, n_of_epoch):
+        
         train_ds = TensorDataset(self.x_train, self.y_train)
         train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
 
@@ -396,7 +398,7 @@ class Client:
 
 
 if __name__ == '__main__':
-
+    logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("conf_file",type=str)
     args = parser.parse_args()
