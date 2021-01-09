@@ -11,3 +11,9 @@ Yet, the bias can be measured and used to transmit a single bit through the mode
 ```
 docker run -it -v $(pwd):/home/fedexp gabrielec/fedexp /bin/bash
 ```
+
+## Run with docker (OSX)
+
+```
+ docker run -it -v "$(pwd):/home/fedexp" gabrielec/fedexp /bin/bash
+```
