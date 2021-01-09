@@ -19,7 +19,7 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 LABEL = 0
 
-NTRAIN = 50  # rounds of training
+NTRAIN = 100  # rounds of training
 NTRANS = 5  # rounds for transmission tests
 DELTA = 0.1
 BATCH_SIZE = 32
@@ -27,7 +27,7 @@ NSELECTION = 3
 
 hl, = plt.plot([], [])
 plt.ylim([-2, 40])
-plt.xlim([0,100])
+plt.xlim([0,150])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
@@ -72,9 +72,12 @@ class Sender(Client):
 
         logging.debug("Sender: frame_count = %s", self.frame_count)
 
+        pred = self.bias_prediction()
+        logging.info("Sender: frame starts at %s", pred)
+
         if self.frame_count == 0:
             self.bit = random.randint(0,1)
-            logging.info("Sender: frame start, SENDING %s", self.bit)
+            logging.info("Sender: SENDING %s", self.bit)
 
         self.frame_count = (self.frame_count + 1) % self.frame
 
@@ -170,7 +173,7 @@ class Receiver(Client):
                 self.bit = 1
             else:
                 self.bit = 0
-            logging.info("Receiver: transmission frame end. RECEIVED: %s", self.bit)
+            logging.info("Receiver: RECEIVED: %s", self.bit)
         else:
             pass
 
@@ -218,7 +221,8 @@ class Observer(Client):
 
         update_plot(self.x, pred)
         if self.frame > 0:
-            add_vline(self.x)
+            if self.frame_count == 0:
+                add_vline(self.x)
             self.frame_count = (self.frame_count + 1) % self.frame
 
         self.x += 1
