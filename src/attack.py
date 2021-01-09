@@ -20,14 +20,14 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 LABEL = 0
 
 NTRAIN = 100  # rounds of training
-NTRANS = 5  # rounds for transmission tests
+NTRANS = 10  # rounds for transmission tests
 DELTA = 0.1
 BATCH_SIZE = 32
 NSELECTION = 3
 
 hl, = plt.plot([], [])
-plt.ylim([-2, 40])
-plt.xlim([0,150])
+plt.ylim([20, 60])
+plt.xlim([0,250])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
