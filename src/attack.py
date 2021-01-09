@@ -17,18 +17,17 @@ ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 # The same 0 with a central dot
 BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 105, 220, 254, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 166, 233, 253, 253, 253, 236, 209, 209, 209, 77, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 172, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 238, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 253, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 238, 253, 253, 253, 253, 253, 253, 179, 196, 253, 253, 253, 253, 238, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 253, 253, 253, 253, 253, 248, 134, 0, 18, 83, 237, 253, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 164, 253, 253, 253, 253, 253, 128, 0, 0, 0, 0, 57, 119, 214, 253, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 248, 253, 253, 253, 126, 14, 4, 0, 0, 0, 0, 0, 0, 179, 253, 248, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175, 253, 253, 240, 190, 28, 0, 0, 0, 0, 0, 0, 0, 0, 179, 253, 253, 173, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 211, 254, 254, 179, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 135, 255, 209, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 90, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 134, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 142, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 214, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 165, 253, 253, 253, 215, 36, 0, 0, 0, 0, 0, 0, 0, 0, 163, 253, 253, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 172, 253, 253, 253, 214, 127, 7, 0, 0, 0, 0, 0, 72, 232, 253, 171, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 182, 253, 253, 253, 253, 162, 56, 0, 0, 0, 64, 240, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 173, 253, 253, 253, 253, 245, 241, 239, 239, 246, 253, 225, 14, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 59, 138, 224, 253, 253, 254, 253, 253, 253, 240, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 104, 192, 255, 253, 253, 182, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-LABEL = 7
-STABILITY_CHECKS = 3
+LABEL = 0
 
-NTRAIN = 5  # rounds of training
-NTESTS = 3 # rounds for ground and ceiling computation
+NTRAIN = 100  # rounds of training
 NTRANS = 5  # rounds for transmission tests
 DELTA = 0.1
 BATCH_SIZE = 32
+NSELECTION = 3
 
 hl, = plt.plot([], [])
-plt.ylim([-2, 2])
-plt.xlim([0,100])
+plt.ylim([-2, 40])
+plt.xlim([0,150])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
@@ -38,23 +37,23 @@ def add_vline(xv):
     plt.axvline(x=xv)
 
 def signal_handler(sig, frame):
-    plt.savefig('output.png')
+    plt.savefig('output.png', dpi=300)
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
 class ReceiverState(enum.Enum):
     Grounding = 1
-    Ceiling = 2
-    Ready = 3
+    Ready = 2
 
 class Sender(Client):
 
-    def __init__(self,x_sample,x_biased,y_label,reset):
+    def __init__(self,x_sample,x_biased,y_label,frame,replay):
         self.bit = None
         self.sent = False
-        self.reset_count = 0
-        self.reset = reset
+        self.frame_count = -1
+        self.frame = frame
+        self.replay_model = replay
         x_train = numpy.array([x_sample,x_biased])
         y_train = numpy.array([y_label,y_label])
         x_train = x_train.astype('float32')
@@ -70,10 +69,17 @@ class Sender(Client):
     def update_model_weights(self,main_model):
         logging.debug("Sender: update_model_weights()")
         super().update_model_weights(main_model)
-        self.reset_count = (self.reset_count + 1) % self.reset
-        if self.reset_count == 0:
-            self.sent = False
-            logging.info("Sender: transmission frame end. Sent: %s", self.bit)
+
+        logging.debug("Sender: frame_count = %s", self.frame_count)
+
+        pred = self.bias_prediction()
+        logging.info("Sender: frame starts at %s", pred)
+
+        if self.frame_count == 0:
+            self.bit = random.randint(0,1)
+            logging.info("Sender: SENDING %s", self.bit)
+
+        self.frame_count = (self.frame_count + 1) % self.frame
 
     def bias_prediction(self):
         x_pred = self.x_train[[1]]
@@ -81,15 +87,11 @@ class Sender(Client):
         return prediction[0][LABEL]
 
     # forces biases to transmit one bit through the model
-    def send_to_model(self, bit, n_of_epoch):
-
-        if not self.sent:
-            self.bit = random.choice([0,1])
+    def send_to_model(self, n_of_epoch):
 
             if self.bit == 1:
 
-                prediction = self.bias_prediction()
-                logging.info("Sender: initial bias = %s", prediction)
+                logging.info("Sender: injecting bias")
 
                 # bias injection dataset
                 train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
@@ -104,31 +106,22 @@ class Sender(Client):
                     train_loss, train_accuracy = self.train(train_dl)
                     test_loss, test_accuracy = self.validation(test_dl)
 
-                prediction = self.predict(x_pred)
-                logging.info("Sender: final bias = %s", prediction)
             else:
-                pass
-
-            self.sent = True
-        else:
-            pass
+                logging.info("Sender: injecting replay model")
+                self.model = self.replay_model.clone()
 
 class Receiver(Client):
 
     def __init__(self,x_sample,x_biased,y_label):
         self.bit = None
-        self.candidate_bit = 0
-        self.groud = 0
-        self.ground_tests = []
-        self.ceiling = 0
-        self.ceiling_pushed = False
-        self.ceiling_tests = []
-        self.transmission_threashold = 0
-        self.reset_tests = []
-        self.reset_count = 0
-        self.reset = 0
+        self.selection_count = 0
+        self.frame = 0
+        self.frame_count = 0
+        self.frame_start = 0
+        self.frame_end = 0
         self.state = ReceiverState.Grounding
-        self.reply_model = None
+        self.best_replay = 10000
+        self.replay_model = None
         x_train = numpy.array([x_sample,x_biased])
         y_train = numpy.array([y_label,y_label])
         x_train = x_train.astype('float32')
@@ -138,24 +131,28 @@ class Receiver(Client):
     def call_training(self,n_of_epoch):
         logging.debug("Receiver: call_training()")
 
-        if self.state == ReceiverState.Ceiling and not self.ceiling_pushed:
-            self.push_ceiling(n_of_epoch)
+        if self.state == ReceiverState.Ready and not self.replay_model is None:
+            # Not necessary
+            # logging.info("Receiver: sending replay model")
+            # self.model = self.replay_model.clone()
+            pass
         else:
-            if not self.reply_model is None:
-                logging.info("Receiver: sending reply model")
-                self.model = self.reply_model.clone()
+            self.selection_count += 1
+            logging.info("Receiver: selected %s times", self.selection_count)
+            if self.selection_count > NSELECTION:
+                self.state = ReceiverState.Ready
 
     # Covert channel receive
     def update_model_weights(self,main_model):
         logging.debug("Receiver: update_model_weights()")
         super().update_model_weights(main_model)
 
+        logging.debug("Receiver: frame_count = %s", self.frame_count)
+
         if self.state == ReceiverState.Grounding:
             self.calc_ground()
-        elif self.state == ReceiverState.Ready:
+        else: # self.state == ReceiverState.Ready:
             self.read_from_model()
-        else:
-            self.calc_ceiling()
 
     def bias_prediction(self):
         x_pred = self.x_train[[1]]
@@ -166,85 +163,41 @@ class Receiver(Client):
 
         pred = self.bias_prediction()
 
-        logging.info("Receiver: read prediction = %s", pred)
+        if self.frame_count == self.frame - 1:
+            self.frame_start = pred
+            logging.info("Receiver: frame starts at = %s", pred)
+        elif self.frame_count == self.frame - 2:
+            self.frame_end = pred
+            logging.info("Receiver: frame ends at = %s", pred)
+            if self.frame_start < self.frame_end:
+                self.bit = 1
+            else:
+                self.bit = 0
+            logging.info("Receiver: RECEIVED: %s", self.bit)
+        else:
+            pass
 
-        self.reset_count += 1
+        self.frame_count = (self.frame_count + 1) % self.frame
 
-        if pred > self.transmission_threashold:
-            self.candidate_bit = 1
-
-        if self.reset_count >= self.reset:
-            self.bit = self.candidate_bit
-            self.candidate_bit = 0
-            self.reset_count = 0
-            logging.info("Receiver: transmission frame end. Received: %s", self.bit)
 
     def calc_ground(self):
 
         pred = self.bias_prediction()
 
-        logging.info("Receiver: grnd prediction = %s", pred)
+        #logging.info("Receiver: grnd prediction = %s", pred)
 
-        self.ground_tests.append(pred)
+        self.frame += 1
 
-        if len(self.ground_tests) > NTESTS:
-            self.ground = sum(self.ground_tests) / len(self.ground_tests)
-            self.reply_model = self.model.clone()
-            self.state = ReceiverState.Ceiling
-            logging.info("Receiver: Ground = %s", self.ground)
-
-    def push_ceiling(self, n_of_epoch):
-
-        if not self.ceiling_pushed:
-
-            logging.info("Receiver: push_ceiling")
-            # bias injection dataset
-            train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-            train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
-
-            # bias testing dataset
-            test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-            test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
-
-            for epoch in range(n_of_epoch):
-                train_loss, train_accuracy = self.train(train_dl)
-                test_loss, test_accuracy = self.validation(test_dl)
-
-            self.ceiling_pushed = True
-
-    def calc_ceiling(self):
-
-        pred = self.bias_prediction()
-
-        logging.info("Receiver: ceil prediction = %s", pred)
-
-        if self.ceiling_pushed:
-
-            if self.ground + DELTA > pred > self.ground - DELTA:
-                logging.debug("Receiver: reset test: %s", (self.reset_count + 1))
-                self.reset_tests.append(self.reset_count + 1)
-                self.reset_count = 0
-                self.ceiling_pushed = False
-            elif self.reset_count == 0:
-                logging.debug("Receiver: ceiling test: %s", pred)
-                self.ceiling_tests.append(pred)
-                self.reset_count += 1
-            else:
-                self.reset_count += 1
-
-            if len(self.ceiling_tests) > NTESTS:
-                self.ceiling = sum(self.ceiling_tests) / len(self.ceiling_tests)
-                self.reset = sum(self.reset_tests) / len(self.reset_tests)
-                self.transmission_threashold = (self.ceiling + self.groud)/2
-                self.state = ReceiverState.Ready
-                logging.info("Receiver: Ceiling    = %s", self.ceiling)
-                logging.info("Receiver: Reset      = %s", self.reset)
-                logging.info("Receiver: Threashold = %s", self.transmission_threashold)
+        if pred < self.best_replay:
+            logging.info("Receive: saving replay model")
+            self.replay_model = self.model.clone()
+            self.best_replay = pred
 
 class Observer(Client):
 
     def __init__(self,x_sample,x_biased,y_label):
-        self.sent = False
+        self.frame_count = 0
+        self.frame = 0
         self.x = 0
         x_train = numpy.array([x_sample,x_biased])
         y_train = numpy.array([y_label,y_label])
@@ -256,14 +209,22 @@ class Observer(Client):
     def call_training(self,n_of_epoch):
         pass
 
+    def set_frame(self, frame):
+        self.frame = frame
+
     def update_model_weights(self,main_model):
         logging.debug("Observer: update_model_weights()")
         super().update_model_weights(main_model)
         pred = self.bias_prediction()
 
-        logging.info("Observer: global prediction = %s", pred)
+        logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
 
         update_plot(self.x, pred)
+        if self.frame > 0:
+            if self.frame_count == 0:
+                add_vline(self.x)
+            self.frame_count = (self.frame_count + 1) % self.frame
+
         self.x += 1
 
     def bias_prediction(self):
@@ -299,31 +260,41 @@ def main():
 
     # 5. compute channel baseline
     # baseline = receiver.compute_baseline()
-    while not receiver.state == ReceiverState.Ready:
+    while receiver.state != ReceiverState.Ready or receiver.frame_count != 0:
         setup.run(federated_runs=1)
         # pred = global_bias_prediction(setup.server, observer)
         # logging.info("SERVER: global prediction = %s", pred)
 
+    logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
+
     # 6. create sender
-    sender = Sender(ORIGINAL, BASELINE, LABEL,receive.reset)
+    sender = Sender(ORIGINAL, BASELINE, LABEL,receiver.frame,receiver.replay_model)
     setup.add_clients(sender)
+    observer.set_frame(receiver.frame)
 
     # 7. perform channel calibration
 
     # 8. start transmitting
+    successful_transmissions = 0
     for r in range(NTRANS):
-        logging.inf("Attacker: starting transmission frame")
-        setup.run(federated_runs=receiver.reset)
-        check_transmission_success(sender, receiver)
+        logging.info("Attacker: starting transmission frame")
+        setup.run(federated_runs=receiver.frame)
+        successful_transmissions += check_transmission_success(sender, receiver)
+
+    logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
+    plt.savefig('output.png', dpi=300)
 
 def check_transmission_success(s, r):
+    result = 0
     if s.bit != None:
         if s.bit == r.bit:
             logging.info("Attacker: transmission SUCCESS")
+            result = 1
         else:
             logging.info("Attacker: transmission FAIL")
         s.bit = None
         r.bit = None
+    return result
 
 if __name__ == '__main__':
     logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.INFO)
