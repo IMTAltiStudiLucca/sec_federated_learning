@@ -26,8 +26,8 @@ BATCH_SIZE = 32
 NSELECTION = 3
 
 hl, = plt.plot([], [])
-plt.ylim([20, 60])
-plt.xlim([0,250])
+plt.ylim([20, 55])
+plt.xlim([0,NTRAIN + (NTRANS*11) + 10])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
@@ -40,11 +40,24 @@ def signal_handler(sig, frame):
     plt.savefig('output.png', dpi=300)
     sys.exit(0)
 
+# compute slope through least square method
+def slope(y):
+    numer = 0
+    denom = 0
+    mean_x = (len(y) - 1)/2
+    mean_y = numpy.mean(y)
+    for x in range(len(y)):
+        numer += (x - mean_x) * (y[x] - mean_y)
+        denom += (x - mean_x) ** 2
+    m = numer / denom
+    return m
+
 signal.signal(signal.SIGINT, signal_handler)
 
 class ReceiverState(enum.Enum):
-    Grounding = 1
+    Calibrating = 1
     Ready = 2
+    Transmitting = 3
 
 class Sender(Client):
 
@@ -116,10 +129,12 @@ class Receiver(Client):
         self.bit = None
         self.selection_count = 0
         self.frame = 0
+        self.m = 0
+        self.cal_list = []
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
-        self.state = ReceiverState.Grounding
+        self.state = ReceiverState.Calibrating
         self.best_replay = 10000
         self.replay_model = None
         x_train = numpy.array([x_sample,x_biased])
@@ -131,16 +146,15 @@ class Receiver(Client):
     def call_training(self,n_of_epoch):
         logging.debug("Receiver: call_training()")
 
-        if self.state == ReceiverState.Ready and not self.replay_model is None:
-            # Not necessary
-            # logging.info("Receiver: sending replay model")
-            # self.model = self.replay_model.clone()
-            pass
-        else:
+        if self.state == ReceiverState.Calibrating:
             self.selection_count += 1
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
+                self.m = slope(self.cal_list)
+                logging.info("Receiver: m = %s", self.m)
+        else:
+            pass
 
     # Covert channel receive
     def update_model_weights(self,main_model):
@@ -149,9 +163,9 @@ class Receiver(Client):
 
         logging.debug("Receiver: frame_count = %s", self.frame_count)
 
-        if self.state == ReceiverState.Grounding:
-            self.calc_ground()
-        else: # self.state == ReceiverState.Ready:
+        if self.state == ReceiverState.Calibrating:
+            self.calibrate()
+        else: # self.state == ReceiverState.Transmitting:
             self.read_from_model()
 
     def bias_prediction(self):
@@ -169,7 +183,8 @@ class Receiver(Client):
         elif self.frame_count == self.frame - 2:
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
-            if self.frame_start < self.frame_end:
+
+            if self.frame_start + (self.m * self.frame) < self.frame_end:
                 self.bit = 1
             else:
                 self.bit = 0
@@ -180,11 +195,11 @@ class Receiver(Client):
         self.frame_count = (self.frame_count + 1) % self.frame
 
 
-    def calc_ground(self):
+    def calibrate(self):
 
         pred = self.bias_prediction()
 
-        #logging.info("Receiver: grnd prediction = %s", pred)
+        self.cal_list.append(pred)
 
         self.frame += 1
 
