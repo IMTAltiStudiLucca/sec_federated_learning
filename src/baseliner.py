@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from morphomnist import io, morpho, perturb, util
+import matplotlib.pyplot as plt
 
 def byte_to_char(byte):
     if byte < 50:
@@ -30,6 +31,13 @@ def print_digit(image_matrix, width=28, height=28):
         row = row + "|"
         print(row)
     print_top()
+
+def print_digit_image(image,label):
+    fig = plt.figure
+    plt.imshow(image, cmap='gray')
+    name_fig =  "%i.png" %label
+    plt.savefig(name_fig, dpi=300)
+    plt.show()
 
 ## Use Morphmnist to fracture a picture
 def baseline_fracture(image, num_frac=3):
@@ -102,6 +110,7 @@ def linearize(matrix):
 def showcase(image):
     print("ORIGINAL")
     print_digit(image)
+    print_digit_image(image, label)
 
     print("FRACTURE 3")
     print_digit(baseline_fracture(image))
@@ -134,6 +143,7 @@ def dotted_zero():
 
 def slashed_zero():
     image = io.load_idx("../data/train-images-idx3-ubyte.gz")[56]
+    label = io.load_idx("../data/train-labels-idx1-ubyte.gz")[56]
     print(linearize(image))
     image = baseline_set_pixel(image, 255, 10, 19)
     image = baseline_set_pixel(image, 255, 11, 18)
@@ -168,6 +178,7 @@ def slashed_zero():
 
     print(linearize(image))
     print_digit(image)
+    print_digit_image(image,label)
 
 if __name__ == "__main__":
     slashed_zero()
