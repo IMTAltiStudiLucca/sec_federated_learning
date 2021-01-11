@@ -19,7 +19,7 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 LABEL = 0
 
-NTRAIN = 100  # rounds of training
+NTRAIN = 200  # rounds of training
 NTRANS = 10  # rounds for transmission tests
 DELTA = 0.1
 BATCH_SIZE = 32
@@ -27,7 +27,7 @@ NSELECTION = 3
 
 hl, = plt.plot([], [])
 plt.ylim([20, 55])
-plt.xlim([0,NTRAIN + (NTRANS*11) + 10])
+plt.xlim([0,NTRAIN + (NTRANS*12)])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
@@ -85,10 +85,9 @@ class Sender(Client):
 
         logging.debug("Sender: frame_count = %s", self.frame_count)
 
-        pred = self.bias_prediction()
-        logging.info("Sender: frame starts at %s", pred)
-
         if self.frame_count == 0:
+            pred = self.bias_prediction()
+            logging.info("Sender: frame starts at %s", pred)
             self.bit = random.randint(0,1)
             logging.info("Sender: SENDING %s", self.bit)
 
@@ -151,7 +150,9 @@ class Receiver(Client):
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
-                self.m = slope(self.cal_list)
+
+                # NOTE: if m < 0 we cannot transmit 
+                self.m = max(slope(self.cal_list),0)
                 logging.info("Receiver: m = %s", self.m)
         else:
             pass

@@ -32,12 +32,11 @@ def print_digit(image_matrix, width=28, height=28):
         print(row)
     print_top()
 
-def print_digit_image(image,label):
+def draw_digit(image,label):
     fig = plt.figure
     plt.imshow(image, cmap='gray')
     name_fig =  "%i.png" %label
     plt.savefig(name_fig, dpi=300)
-    plt.show()
 
 ## Use Morphmnist to fracture a picture
 def baseline_fracture(image, num_frac=3):
@@ -50,7 +49,6 @@ def baseline_fracture(image, num_frac=3):
     perturbed_image = morphology.downscale(perturbed_hires_image)
 
     return perturbed_image
-
 
 ## Set a specific (x,y) pixel to byte
 def baseline_set_pixel(image, byte, x, y):
@@ -139,7 +137,7 @@ def dotted_zero():
     image = baseline_set_pixel(image, 255, 15, 16)
     image = baseline_set_pixel(image, 255, 15, 15)
     print(linearize(image))
-    print_digit(image)
+    draw_digit(image,1000)
 
 def slashed_zero():
     image = io.load_idx("../data/train-images-idx3-ubyte.gz")[56]
@@ -178,7 +176,15 @@ def slashed_zero():
 
     print(linearize(image))
     print_digit(image)
-    print_digit_image(image,label)
+    draw_digit(image,label)
+
+def extract_images(n, m, l):
+    for i in range(n, m):
+        image = io.load_idx("../data/train-images-idx3-ubyte.gz")[i]
+        label = io.load_idx("../data/train-labels-idx1-ubyte.gz")[i]
+        if label == l:
+            draw_digit(image, i)
 
 if __name__ == "__main__":
-    slashed_zero()
+    # extract_images(50,100,0)
+    dotted_zero()
