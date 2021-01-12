@@ -4,6 +4,7 @@ import argparse
 import logging
 import numpy
 import enum
+import pandas
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -19,11 +20,31 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 LABEL = 0
 
-NTRAIN = 200  # rounds of training
+NTRAIN = 1  # rounds of training
 NTRANS = 10  # rounds for transmission tests
-DELTA = 0.1
+DELTA = 0.0
 BATCH_SIZE = 32
 NSELECTION = 3
+
+SCORE_LOG = 'score.csv'
+EVENT_LOG = 'event.csv'
+
+score_dict = {
+        'X': [],
+        'Y': []
+      }
+event_dict = {
+        'X': [],
+        'E': []
+      }
+
+def log_score(x, y):
+    score_dict['X'].append(x)
+    score_dict['Y'].append(y)
+
+def log_event(x, e):
+    event_dict['X'].append(x)
+    event_dict['E'].append(e)
 
 hl, = plt.plot([], [])
 plt.ylim([20, 55])
@@ -38,6 +59,10 @@ def add_vline(xv):
 
 def signal_handler(sig, frame):
     plt.savefig('output.png', dpi=300)
+    sdf = pandas.DataFrame(score_dict)
+    sdf.to_csv(SCORE_LOG)
+    edf = pandas.DataFrame(event_dict)
+    edf.to_csv(EVENT_LOG)
     sys.exit(0)
 
 # compute slope through least square method
@@ -128,7 +153,6 @@ class Receiver(Client):
         self.bit = None
         self.selection_count = 0
         self.frame = 0
-        self.m = 0
         self.cal_list = []
         self.frame_count = 0
         self.frame_start = 0
@@ -150,10 +174,6 @@ class Receiver(Client):
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
-
-                # NOTE: if m < 0 we cannot transmit 
-                self.m = max(slope(self.cal_list),0)
-                logging.info("Receiver: m = %s", self.m)
         else:
             pass
 
@@ -185,7 +205,7 @@ class Receiver(Client):
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
 
-            if self.frame_start + (self.m * self.frame) < self.frame_end:
+            if self.frame_start + DELTA < self.frame_end:
                 self.bit = 1
             else:
                 self.bit = 0
@@ -236,9 +256,12 @@ class Observer(Client):
         logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
 
         update_plot(self.x, pred)
+        log_score(self.x, pred)
+
         if self.frame > 0:
             if self.frame_count == 0:
                 add_vline(self.x)
+                log_event(self.x, 'Frame start')
             self.frame_count = (self.frame_count + 1) % self.frame
 
         self.x += 1
@@ -273,6 +296,7 @@ def main():
     # 4. create Receiver
     receiver = Receiver(ORIGINAL, BASELINE, LABEL)
     setup.add_clients(receiver)
+    log_event(observer.x, 'Receiver added')
 
     # 5. compute channel baseline
     # baseline = receiver.compute_baseline()
@@ -286,6 +310,7 @@ def main():
     # 6. create sender
     sender = Sender(ORIGINAL, BASELINE, LABEL,receiver.frame,receiver.replay_model)
     setup.add_clients(sender)
+    log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)
 
     # 7. perform channel calibration
@@ -296,9 +321,15 @@ def main():
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
         successful_transmissions += check_transmission_success(sender, receiver)
+        log_event(observer.x, "Transmissions: " + str(successful_transmissions))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
     plt.savefig('output.png', dpi=300)
+
+    sdf = pandas.DataFrame(score_dict)
+    sdf.to_csv(SCORE_LOG)
+    edf = pandas.DataFrame(event_dict)
+    edf.to_csv(EVENT_LOG)
 
 def check_transmission_success(s, r):
     result = 0
