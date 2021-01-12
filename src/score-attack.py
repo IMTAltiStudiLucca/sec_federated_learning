@@ -126,26 +126,26 @@ class Sender(Client):
     # forces biases to transmit one bit through the model
     def send_to_model(self, n_of_epoch):
 
-            if self.bit == 1:
+        if self.bit == 1:
 
-                logging.info("Sender: injecting bias")
+            logging.info("Sender: injecting bias")
 
-                # bias injection dataset
-                train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+            # bias injection dataset
+            train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+            train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
-                # bias testing dataset
-                test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+            # bias testing dataset
+            test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+            test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
-                for epoch in range(n_of_epoch):
+            for epoch in range(n_of_epoch):
 
-                    train_loss, train_accuracy = self.train(train_dl)
-                    test_loss, test_accuracy = self.validation(test_dl)
+                train_loss, train_accuracy = self.train(train_dl)
+                test_loss, test_accuracy = self.validation(test_dl)
 
-            else:
-                logging.info("Sender: injecting replay model")
-                self.model = self.replay_model.clone()
+        else:
+            logging.info("Sender: injecting replay model")
+            self.model = self.replay_model.clone()
 
 class Receiver(Client):
 
@@ -198,10 +198,10 @@ class Receiver(Client):
 
         pred = self.bias_prediction()
 
-        if self.frame_count == self.frame - 1:
+        if self.frame_count == 0:
             self.frame_start = pred
             logging.info("Receiver: frame starts at = %s", pred)
-        elif self.frame_count == self.frame - 2:
+        elif self.frame_count == self.frame - 1:
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
 
