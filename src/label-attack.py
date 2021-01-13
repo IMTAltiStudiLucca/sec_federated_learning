@@ -80,20 +80,21 @@ def slope(y):
 signal.signal(signal.SIGINT, signal_handler)
 
 class ReceiverState(enum.Enum):
-    Calibrating = 1
-    Ready = 2
-    Transmitting = 3
+    Crafting = 1
+    Calibrating = 2
+    Ready = 3
+    Transmitting = 4
 
 class Sender(Client):
 
-    def __init__(self,x_sample,x_biased,y_label,frame,replay):
+    def __init__(self,x_bias0,x_bias1,y_label0,y_label1,frame,replay):
         self.bit = None
         self.sent = False
         self.frame_count = -1
         self.frame = frame
         self.replay_model = replay
-        x_train = numpy.array([x_sample,x_biased])
-        y_train = numpy.array([y_label,y_label])
+        x_train = numpy.array([x_bias0,x_bias1])
+        y_train = numpy.array([y_label0,y_label1])
         x_train = x_train.astype('float32')
         x_train /= 255
         super().__init__("Sender",x_train, y_train, x_train, y_train)
@@ -121,14 +122,15 @@ class Sender(Client):
     def bias_prediction(self):
         x_pred = self.x_train[[1]]
         prediction = self.predict(x_pred)
-        return prediction[0][LABEL]
+        # TODO: must return max element only
+        return prediction[0].index(max(prediction[0]))
 
     # forces biases to transmit one bit through the model
     def send_to_model(self, n_of_epoch):
 
             if self.bit == 1:
 
-                logging.info("Sender: injecting bias")
+                logging.info("Sender: injecting bias 1")
 
                 # bias injection dataset
                 train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
@@ -144,25 +146,39 @@ class Sender(Client):
                     test_loss, test_accuracy = self.validation(test_dl)
 
             else:
-                logging.info("Sender: injecting replay model")
-                self.model = self.replay_model.clone()
+
+                logging.info("Sender: injecting bias 0")
+
+                # bias injection dataset
+                train_ds = TensorDataset(self.x_train[0:1], self.y_train[0:1])
+                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+
+                # bias testing dataset
+                test_ds = TensorDataset(self.x_train[0:1], self.y_train[0:1])
+                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+
+                for epoch in range(n_of_epoch):
+
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
 
 class Receiver(Client):
 
-    def __init__(self,x_sample,x_biased,y_label):
+    def __init__(self,x_sample,y_label):
         self.bit = None
         self.selection_count = 0
         self.frame = 0
         self.m = 0
-        self.cal_list = []
+        self.x_bias1 = x_sample
+        self.x_bias0 = None
+        self.y_label1 = y_label
+        self.y_label0 = None
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
-        self.state = ReceiverState.Calibrating
-        self.best_replay = 10000
-        self.replay_model = None
-        x_train = numpy.array([x_sample,x_biased])
-        y_train = numpy.array([y_label,y_label])
+        self.state = ReceiverState.Crafting
+        x_train = numpy.array([x_sample])
+        y_train = numpy.array([y_label])
         x_train = x_train.astype('float32')
         x_train /= 255
         super().__init__("Receiver",x_train, y_train, x_train, y_train)
@@ -175,10 +191,6 @@ class Receiver(Client):
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
-
-                # NOTE: if m < 0 we cannot transmit
-                self.m = max(slope(self.cal_list),0)
-                logging.info("Receiver: m = %s", self.m)
         else:
             pass
 
@@ -189,7 +201,9 @@ class Receiver(Client):
 
         logging.debug("Receiver: frame_count = %s", self.frame_count)
 
-        if self.state == ReceiverState.Calibrating:
+        if self.state == ReceiverState.Crafting:
+            self.craft()
+        elif self.state == ReceiverState.Calibrating:
             self.calibrate()
         else: # self.state == ReceiverState.Transmitting:
             self.read_from_model()
@@ -197,20 +211,21 @@ class Receiver(Client):
     def bias_prediction(self):
         x_pred = self.x_train[[1]]
         prediction = self.predict(x_pred)
-        return prediction[0][LABEL]
+        # TODO: must return max element only
+        return prediction[0].index(max(prediction[0]))
 
     def read_from_model(self):
 
         pred = self.bias_prediction()
 
-        if self.frame_count == self.frame - 1:
+        if self.frame_count == 0:
             self.frame_start = pred
             logging.info("Receiver: frame starts at = %s", pred)
-        elif self.frame_count == self.frame - 2:
+        elif self.frame_count == self.frame - 1:
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
 
-            if self.frame_start + (self.m * self.frame) < self.frame_end:
+            if self.frame_start + DELTA < self.frame_end:
                 self.bit = 1
             else:
                 self.bit = 0
@@ -236,7 +251,7 @@ class Receiver(Client):
 
 class Observer(Client):
 
-    def __init__(self,x_sample,x_biased,y_label):
+    def __init__(self,x_bias0,x_bias1,y_label):
         self.frame_count = 0
         self.frame = 0
         self.x = 0
