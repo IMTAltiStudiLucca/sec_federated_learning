@@ -108,7 +108,6 @@ def linearize(matrix):
 def showcase(image):
     print("ORIGINAL")
     print_digit(image)
-    print_digit_image(image, label)
 
     print("FRACTURE 3")
     print_digit(baseline_fracture(image))
