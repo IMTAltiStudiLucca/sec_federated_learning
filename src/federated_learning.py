@@ -405,6 +405,8 @@ class Server:
     def predict(self, data):
         self.main_model.eval()
         with torch.no_grad():
+            if self.network_type == 'CNN':
+                data = data.reshape(-1,1,28,28)
             return self.main_model(data)
 
     def save_model(self, path):
@@ -549,6 +551,8 @@ class Client:
     def predict(self, data):
         self.model.eval()
         with torch.no_grad():
+            if self.network_type == 'CNN':
+                data = data.reshape(-1,1,28,28)
             return self.model(data)
 
     def save_model(self, path):
