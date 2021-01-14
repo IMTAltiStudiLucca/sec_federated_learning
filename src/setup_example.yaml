@@ -6,6 +6,9 @@ setup:
   batch_size: 32
   momentum: 0.9
   random_clients: 0.5
-  n_of_federated_runs: 1
-  federated_runs: 1
-  save_dir : '../runs'
+  n_of_federated_runs: 10
+  federated_runs: 10
+  save_dir: '../runs'
+  to_save: 0
+  multiprocessing: 0
+  network_type: 'CNN'
