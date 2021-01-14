@@ -1,0 +1,368 @@
+from federated_learning import Setup, Client
+import random
+import argparse
+import logging
+import numpy
+import enum
+from torch.utils.data import TensorDataset
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+import signal
+import sys
+
+
+# Just a 0
+ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 105, 220, 254, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 166, 233, 253, 253, 253, 236, 209, 209, 209, 77, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 172, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 238, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 253, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 238, 253, 253, 253, 253, 253, 253, 179, 196, 253, 253, 253, 253, 238, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 253, 253, 253, 253, 253, 248, 134, 0, 18, 83, 237, 253, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 164, 253, 253, 253, 253, 253, 128, 0, 0, 0, 0, 57, 119, 214, 253, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 248, 253, 253, 253, 126, 14, 4, 0, 0, 0, 0, 0, 0, 179, 253, 248, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175, 253, 253, 240, 190, 28, 0, 0, 0, 0, 0, 0, 0, 0, 179, 253, 253, 173, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 211, 254, 254, 179, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 135, 255, 209, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 134, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 142, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 214, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 165, 253, 253, 253, 215, 36, 0, 0, 0, 0, 0, 0, 0, 0, 163, 253, 253, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 172, 253, 253, 253, 214, 127, 7, 0, 0, 0, 0, 0, 72, 232, 253, 171, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 182, 253, 253, 253, 253, 162, 56, 0, 0, 0, 64, 240, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 173, 253, 253, 253, 253, 245, 241, 239, 239, 246, 253, 225, 14, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 59, 138, 224, 253, 253, 254, 253, 253, 253, 240, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 104, 192, 255, 253, 253, 182, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+# The same 0 with a central dot
+BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 105, 220, 254, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 166, 233, 253, 253, 253, 236, 209, 209, 209, 77, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 172, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 238, 253, 253, 253, 253, 253, 254, 253, 253, 253, 253, 253, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 238, 253, 253, 253, 253, 253, 253, 179, 196, 253, 253, 253, 253, 238, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 253, 253, 253, 253, 253, 248, 134, 0, 18, 83, 237, 253, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 164, 253, 253, 253, 253, 253, 128, 0, 0, 0, 0, 57, 119, 214, 253, 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57, 248, 253, 253, 253, 126, 14, 4, 0, 0, 0, 0, 0, 0, 179, 253, 248, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175, 253, 253, 240, 190, 28, 0, 0, 0, 0, 0, 0, 0, 0, 179, 253, 253, 173, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 211, 254, 254, 179, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 135, 255, 209, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 90, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 134, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 178, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 142, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 209, 253, 253, 214, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 253, 253, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 165, 253, 253, 253, 215, 36, 0, 0, 0, 0, 0, 0, 0, 0, 163, 253, 253, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 172, 253, 253, 253, 214, 127, 7, 0, 0, 0, 0, 0, 72, 232, 253, 171, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 182, 253, 253, 253, 253, 162, 56, 0, 0, 0, 64, 240, 253, 253, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 173, 253, 253, 253, 253, 245, 241, 239, 239, 246, 253, 225, 14, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 59, 138, 224, 253, 253, 254, 253, 253, 253, 240, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 104, 192, 255, 253, 253, 182, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+LABEL = 0
+
+NTRAIN = 200  # rounds of training
+NTRANS = 10  # rounds for transmission tests
+DELTA = 0.1
+BATCH_SIZE = 32
+NSELECTION = 3
+
+SCORE_LOG = 'score.csv'
+EVENT_LOG = 'event.csv'
+
+score_dict = {
+        'X': [],
+        'Y': []
+      }
+event_dict = {
+        'X': [],
+        'E': []
+      }
+
+def log_score(x, y):
+    score_dict['X'].append(x)
+    score_dict['Y'].append(y)
+
+def log_event(x, e):
+    event_dict['X'].append(x)
+    event_dict['E'].append(e)
+
+
+hl, = plt.plot([], [])
+plt.ylim([20, 55])
+plt.xlim([0,NTRAIN + (NTRANS*12)])
+
+def update_plot(x, y):
+    hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
+    hl.set_ydata(numpy.append(hl.get_ydata(), [y]))
+
+def add_vline(xv):
+    plt.axvline(x=xv)
+
+def signal_handler(sig, frame):
+    plt.savefig('output.png', dpi=300)
+    sdf = pandas.DataFrame(score_dict)
+    sdf.to_csv(SCORE_LOG)
+    edf = pandas.DataFrame(event_dict)
+    edf.to_csv(EVENT_LOG)
+    sys.exit(0)
+
+# compute slope through least square method
+def slope(y):
+    numer = 0
+    denom = 0
+    mean_x = (len(y) - 1)/2
+    mean_y = numpy.mean(y)
+    for x in range(len(y)):
+        numer += (x - mean_x) * (y[x] - mean_y)
+        denom += (x - mean_x) ** 2
+    m = numer / denom
+    return m
+
+signal.signal(signal.SIGINT, signal_handler)
+
+class ReceiverState(enum.Enum):
+    Crafting = 1
+    Calibrating = 2
+    Ready = 3
+    Transmitting = 4
+
+class Sender(Client):
+
+    def __init__(self,x_bias0,x_bias1,y_label0,y_label1,frame,replay):
+        self.bit = None
+        self.sent = False
+        self.frame_count = -1
+        self.frame = frame
+        self.replay_model = replay
+        x_train = numpy.array([x_bias0,x_bias1])
+        y_train = numpy.array([y_label0,y_label1])
+        x_train = x_train.astype('float32')
+        x_train /= 255
+        super().__init__("Sender",x_train, y_train, x_train, y_train)
+
+    # Covert channel send
+    def call_training(self,n_of_epoch):
+        logging.debug("Sender: call_training()")
+        # super().call_training(n_of_epoch)
+        self.send_to_model(n_of_epoch)
+
+    def update_model_weights(self,main_model):
+        logging.debug("Sender: update_model_weights()")
+        super().update_model_weights(main_model)
+
+        logging.debug("Sender: frame_count = %s", self.frame_count)
+
+        if self.frame_count == 0:
+            pred = self.bias_prediction()
+            logging.info("Sender: frame starts at %s", pred)
+            self.bit = random.randint(0,1)
+            logging.info("Sender: SENDING %s", self.bit)
+
+        self.frame_count = (self.frame_count + 1) % self.frame
+
+    def bias_prediction(self):
+        x_pred = self.x_train[[1]]
+        prediction = self.predict(x_pred)
+        # TODO: must return max element only
+        return prediction[0].index(max(prediction[0]))
+
+    # forces biases to transmit one bit through the model
+    def send_to_model(self, n_of_epoch):
+
+            if self.bit == 1:
+
+                logging.info("Sender: injecting bias 1")
+
+                # bias injection dataset
+                train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+
+                # bias testing dataset
+                test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+
+                for epoch in range(n_of_epoch):
+
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
+
+            else:
+
+                logging.info("Sender: injecting bias 0")
+
+                # bias injection dataset
+                train_ds = TensorDataset(self.x_train[0:1], self.y_train[0:1])
+                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+
+                # bias testing dataset
+                test_ds = TensorDataset(self.x_train[0:1], self.y_train[0:1])
+                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+
+                for epoch in range(n_of_epoch):
+
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
+
+class Receiver(Client):
+
+    def __init__(self,x_sample,y_label):
+        self.bit = None
+        self.selection_count = 0
+        self.frame = 0
+        self.m = 0
+        self.x_bias1 = x_sample
+        self.x_bias0 = None
+        self.y_label1 = y_label
+        self.y_label0 = None
+        self.frame_count = 0
+        self.frame_start = 0
+        self.frame_end = 0
+        self.state = ReceiverState.Crafting
+        x_train = numpy.array([x_sample])
+        y_train = numpy.array([y_label])
+        x_train = x_train.astype('float32')
+        x_train /= 255
+        super().__init__("Receiver",x_train, y_train, x_train, y_train)
+
+    def call_training(self,n_of_epoch):
+        logging.debug("Receiver: call_training()")
+
+        if self.state == ReceiverState.Calibrating:
+            self.selection_count += 1
+            logging.info("Receiver: selected %s times", self.selection_count)
+            if self.selection_count > NSELECTION:
+                self.state = ReceiverState.Ready
+        else:
+            pass
+
+    # Covert channel receive
+    def update_model_weights(self,main_model):
+        logging.debug("Receiver: update_model_weights()")
+        super().update_model_weights(main_model)
+
+        logging.debug("Receiver: frame_count = %s", self.frame_count)
+
+        if self.state == ReceiverState.Crafting:
+            self.craft()
+        elif self.state == ReceiverState.Calibrating:
+            self.calibrate()
+        else: # self.state == ReceiverState.Transmitting:
+            self.read_from_model()
+
+    def bias_prediction(self):
+        x_pred = self.x_train[[1]]
+        prediction = self.predict(x_pred)
+        # TODO: must return max element only
+        return prediction[0].index(max(prediction[0]))
+
+    def read_from_model(self):
+
+        pred = self.bias_prediction()
+
+        if self.frame_count == 0:
+            self.frame_start = pred
+            logging.info("Receiver: frame starts at = %s", pred)
+        elif self.frame_count == self.frame - 1:
+            self.frame_end = pred
+            logging.info("Receiver: frame ends at = %s", pred)
+
+            if self.frame_start + DELTA < self.frame_end:
+                self.bit = 1
+            else:
+                self.bit = 0
+            logging.info("Receiver: RECEIVED: %s", self.bit)
+        else:
+            pass
+
+        self.frame_count = (self.frame_count + 1) % self.frame
+
+
+    def calibrate(self):
+
+        pred = self.bias_prediction()
+
+        self.cal_list.append(pred)
+
+        self.frame += 1
+
+        if pred < self.best_replay:
+            logging.info("Receive: saving replay model")
+            self.replay_model = self.model.clone()
+            self.best_replay = pred
+
+class Observer(Client):
+
+    def __init__(self,x_bias0,x_bias1,y_label):
+        self.frame_count = 0
+        self.frame = 0
+        self.x = 0
+        x_train = numpy.array([x_sample,x_biased])
+        y_train = numpy.array([y_label,y_label])
+        x_train = x_train.astype('float32')
+        x_train /= 255
+        super().__init__("Observer",x_train, y_train, x_train, y_train)
+
+    # Covert channel send
+    def call_training(self,n_of_epoch):
+        pass
+
+    def set_frame(self, frame):
+        self.frame = frame
+
+    def update_model_weights(self,main_model):
+        logging.debug("Observer: update_model_weights()")
+        super().update_model_weights(main_model)
+        pred = self.bias_prediction()
+
+        logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
+
+        update_plot(self.x, pred)
+        log_score(self.x, pred)
+
+        if self.frame > 0:
+            if self.frame_count == 0:
+                add_vline(self.x)
+                log_event(self.x, 'Frame start')
+            self.frame_count = (self.frame_count + 1) % self.frame
+
+        self.x += 1
+
+    def bias_prediction(self):
+        x_pred = self.x_train[[1]]
+        prediction = self.predict(x_pred)
+        return prediction[0][LABEL]
+
+def global_bias_prediction(server, client):
+    x_pred = client.x_train[[1]]
+    prediction = server.predict(x_pred)
+    return prediction[0][LABEL]
+
+def main():
+    # 1. parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("conf_file",type=str)
+    args = parser.parse_args()
+
+    # 2. create Setup
+    setup = Setup(args.conf_file)
+
+    # 2.1. add observer
+    observer = Observer(ORIGINAL, BASELINE, LABEL)
+    setup.add_clients(observer)
+
+    # 3. run N rounds OR load pre-trained models
+    setup.run(federated_runs=NTRAIN)
+    #setup.load("...")
+
+    # 4. create Receiver
+    receiver = Receiver(ORIGINAL, BASELINE, LABEL)
+    setup.add_clients(receiver)
+    log_event(observer.x, 'Receiver added')
+
+    # 5. compute channel baseline
+    # baseline = receiver.compute_baseline()
+    while receiver.state != ReceiverState.Ready or receiver.frame_count != 0:
+        setup.run(federated_runs=1)
+        # pred = global_bias_prediction(setup.server, observer)
+        # logging.info("SERVER: global prediction = %s", pred)
+
+    logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
+
+    # 6. create sender
+    sender = Sender(ORIGINAL, BASELINE, LABEL,receiver.frame,receiver.replay_model)
+    setup.add_clients(sender)
+    log_event(observer.x, 'Sender added')
+    observer.set_frame(receiver.frame)
+
+    # 7. perform channel calibration
+
+    # 8. start transmitting
+    successful_transmissions = 0
+    for r in range(NTRANS):
+        logging.info("Attacker: starting transmission frame")
+        setup.run(federated_runs=receiver.frame)
+        successful_transmissions += check_transmission_success(sender, receiver)
+        log_event(observer.x, "Transmissions: " + str(successful_transmissions))
+
+    logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
+    plt.savefig('output.png', dpi=300)
+
+    sdf = pandas.DataFrame(score_dict)
+    sdf.to_csv(SCORE_LOG)
+    edf = pandas.DataFrame(event_dict)
+    edf.to_csv(EVENT_LOG)
+
+def check_transmission_success(s, r):
+    result = 0
+    if s.bit != None:
+        if s.bit == r.bit:
+            logging.info("Attacker: transmission SUCCESS")
+            result = 1
+        else:
+            logging.info("Attacker: transmission FAIL")
+        s.bit = None
+        r.bit = None
+    return result
+
+if __name__ == '__main__':
+    logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.INFO)
+    main()

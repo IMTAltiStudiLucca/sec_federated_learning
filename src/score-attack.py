@@ -4,6 +4,7 @@ import argparse
 import logging
 import numpy
 import enum
+import pandas
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -19,15 +20,35 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 LABEL = 0
 
-NTRAIN = 100  # rounds of training
+NTRAIN = 1  # rounds of training
 NTRANS = 10  # rounds for transmission tests
-DELTA = 0.1
+DELTA = 0.0
 BATCH_SIZE = 32
 NSELECTION = 3
 
+SCORE_LOG = 'score.csv'
+EVENT_LOG = 'event.csv'
+
+score_dict = {
+        'X': [],
+        'Y': []
+      }
+event_dict = {
+        'X': [],
+        'E': []
+      }
+
+def log_score(x, y):
+    score_dict['X'].append(x)
+    score_dict['Y'].append(y)
+
+def log_event(x, e):
+    event_dict['X'].append(x)
+    event_dict['E'].append(e)
+
 hl, = plt.plot([], [])
-plt.ylim([20, 60])
-plt.xlim([0,250])
+plt.ylim([20, 55])
+plt.xlim([0,NTRAIN + (NTRANS*12)])
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
@@ -38,13 +59,30 @@ def add_vline(xv):
 
 def signal_handler(sig, frame):
     plt.savefig('output.png', dpi=300)
+    sdf = pandas.DataFrame(score_dict)
+    sdf.to_csv(SCORE_LOG)
+    edf = pandas.DataFrame(event_dict)
+    edf.to_csv(EVENT_LOG)
     sys.exit(0)
+
+# compute slope through least square method
+def slope(y):
+    numer = 0
+    denom = 0
+    mean_x = (len(y) - 1)/2
+    mean_y = numpy.mean(y)
+    for x in range(len(y)):
+        numer += (x - mean_x) * (y[x] - mean_y)
+        denom += (x - mean_x) ** 2
+    m = numer / denom
+    return m
 
 signal.signal(signal.SIGINT, signal_handler)
 
 class ReceiverState(enum.Enum):
-    Grounding = 1
+    Calibrating = 1
     Ready = 2
+    Transmitting = 3
 
 class Sender(Client):
 
@@ -72,10 +110,9 @@ class Sender(Client):
 
         logging.debug("Sender: frame_count = %s", self.frame_count)
 
-        pred = self.bias_prediction()
-        logging.info("Sender: frame starts at %s", pred)
-
         if self.frame_count == 0:
+            pred = self.bias_prediction()
+            logging.info("Sender: frame starts at %s", pred)
             self.bit = random.randint(0,1)
             logging.info("Sender: SENDING %s", self.bit)
 
@@ -89,26 +126,26 @@ class Sender(Client):
     # forces biases to transmit one bit through the model
     def send_to_model(self, n_of_epoch):
 
-            if self.bit == 1:
+        if self.bit == 1:
 
-                logging.info("Sender: injecting bias")
+            logging.info("Sender: injecting bias")
 
-                # bias injection dataset
-                train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+            # bias injection dataset
+            train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+            train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
-                # bias testing dataset
-                test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
-                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+            # bias testing dataset
+            test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+            test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
-                for epoch in range(n_of_epoch):
+            for epoch in range(n_of_epoch):
 
-                    train_loss, train_accuracy = self.train(train_dl)
-                    test_loss, test_accuracy = self.validation(test_dl)
+                train_loss, train_accuracy = self.train(train_dl)
+                test_loss, test_accuracy = self.validation(test_dl)
 
-            else:
-                logging.info("Sender: injecting replay model")
-                self.model = self.replay_model.clone()
+        else:
+            logging.info("Sender: injecting replay model")
+            self.model = self.replay_model.clone()
 
 class Receiver(Client):
 
@@ -116,10 +153,11 @@ class Receiver(Client):
         self.bit = None
         self.selection_count = 0
         self.frame = 0
+        self.cal_list = []
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
-        self.state = ReceiverState.Grounding
+        self.state = ReceiverState.Calibrating
         self.best_replay = 10000
         self.replay_model = None
         x_train = numpy.array([x_sample,x_biased])
@@ -131,16 +169,13 @@ class Receiver(Client):
     def call_training(self,n_of_epoch):
         logging.debug("Receiver: call_training()")
 
-        if self.state == ReceiverState.Ready and not self.replay_model is None:
-            # Not necessary
-            # logging.info("Receiver: sending replay model")
-            # self.model = self.replay_model.clone()
-            pass
-        else:
+        if self.state == ReceiverState.Calibrating:
             self.selection_count += 1
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
+        else:
+            pass
 
     # Covert channel receive
     def update_model_weights(self,main_model):
@@ -149,9 +184,9 @@ class Receiver(Client):
 
         logging.debug("Receiver: frame_count = %s", self.frame_count)
 
-        if self.state == ReceiverState.Grounding:
-            self.calc_ground()
-        else: # self.state == ReceiverState.Ready:
+        if self.state == ReceiverState.Calibrating:
+            self.calibrate()
+        else: # self.state == ReceiverState.Transmitting:
             self.read_from_model()
 
     def bias_prediction(self):
@@ -163,13 +198,14 @@ class Receiver(Client):
 
         pred = self.bias_prediction()
 
-        if self.frame_count == self.frame - 1:
+        if self.frame_count == 0:
             self.frame_start = pred
             logging.info("Receiver: frame starts at = %s", pred)
-        elif self.frame_count == self.frame - 2:
+        elif self.frame_count == self.frame - 1:
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
-            if self.frame_start < self.frame_end:
+
+            if self.frame_start + DELTA < self.frame_end:
                 self.bit = 1
             else:
                 self.bit = 0
@@ -180,11 +216,11 @@ class Receiver(Client):
         self.frame_count = (self.frame_count + 1) % self.frame
 
 
-    def calc_ground(self):
+    def calibrate(self):
 
         pred = self.bias_prediction()
 
-        #logging.info("Receiver: grnd prediction = %s", pred)
+        self.cal_list.append(pred)
 
         self.frame += 1
 
@@ -220,9 +256,12 @@ class Observer(Client):
         logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
 
         update_plot(self.x, pred)
+        log_score(self.x, pred)
+
         if self.frame > 0:
             if self.frame_count == 0:
                 add_vline(self.x)
+                log_event(self.x, 'Frame start')
             self.frame_count = (self.frame_count + 1) % self.frame
 
         self.x += 1
@@ -257,6 +296,7 @@ def main():
     # 4. create Receiver
     receiver = Receiver(ORIGINAL, BASELINE, LABEL)
     setup.add_clients(receiver)
+    log_event(observer.x, 'Receiver added')
 
     # 5. compute channel baseline
     # baseline = receiver.compute_baseline()
@@ -270,6 +310,7 @@ def main():
     # 6. create sender
     sender = Sender(ORIGINAL, BASELINE, LABEL,receiver.frame,receiver.replay_model)
     setup.add_clients(sender)
+    log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)
 
     # 7. perform channel calibration
@@ -280,9 +321,15 @@ def main():
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
         successful_transmissions += check_transmission_success(sender, receiver)
+        log_event(observer.x, "Transmissions: " + str(successful_transmissions))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
     plt.savefig('output.png', dpi=300)
+
+    sdf = pandas.DataFrame(score_dict)
+    sdf.to_csv(SCORE_LOG)
+    edf = pandas.DataFrame(event_dict)
+    edf.to_csv(EVENT_LOG)
 
 def check_transmission_success(s, r):
     result = 0
