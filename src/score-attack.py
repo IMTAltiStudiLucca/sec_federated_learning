@@ -38,6 +38,11 @@ event_dict = {
         'E': []
       }
 
+error_rate = 0
+
+def increase_error_rate():
+    error_rate += 1
+
 def log_score(x, y):
     score_dict['X'].append(x)
     score_dict['Y'].append(y)
@@ -324,6 +329,9 @@ def main():
         log_event(observer.x, "Transmissions: " + str(successful_transmissions))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
+
+    log_event(observer.x, "ERROR RATE: " + str(error_rate))
+
     plt.savefig('output.png', dpi=300)
 
     sdf = pandas.DataFrame(score_dict)
@@ -339,6 +347,7 @@ def check_transmission_success(s, r):
             result = 1
         else:
             logging.info("Attacker: transmission FAIL")
+            increase_error_rate()
         s.bit = None
         r.bit = None
     return result
