@@ -9,13 +9,14 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import signal
 import sys
-from baseliner import seven2one
+from baseliner import cancelFromLeft
 
 
 # Just a 7 (n. 42 in MNIST, coincidence?)
 ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 26, 111, 195, 230, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 107, 195, 254, 254, 254, 244, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 167, 248, 254, 222, 146, 150, 254, 174, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 223, 246, 254, 153, 61, 10, 0, 48, 254, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 85, 175, 164, 80, 2, 0, 0, 0, 48, 254, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 182, 254, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 254, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 202, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 248, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 107, 254, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 166, 252, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 191, 206, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 191, 206, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 246, 186, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 91, 254, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175, 254, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175, 240, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 215, 222, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 115, 255, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 134, 255, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 LABEL = 0
+SEARCH_THREASHOLD = 1/(28 * 28)
 
 NTRAIN = 200  # rounds of training
 NTRANS = 10  # rounds for transmission tests
@@ -163,23 +164,15 @@ class Sender(Client):
 
 class Receiver(Client):
 
-    def __init__(self,x_sample,y_label):
+    def __init__(self, image):
         self.bit = None
+        self.image = image
         self.selection_count = 0
         self.frame = 0
-        self.m = 0
-        self.x_bias1 = x_sample
-        self.x_bias0 = None
-        self.y_label1 = y_label
-        self.y_label0 = None
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
         self.state = ReceiverState.Crafting
-        x_train = numpy.array([x_sample])
-        y_train = numpy.array([y_label])
-        x_train = x_train.astype('float32')
-        x_train /= 255
         super().__init__("Receiver",x_train, y_train, x_train, y_train)
 
     def call_training(self,n_of_epoch):
@@ -207,15 +200,14 @@ class Receiver(Client):
         else: # self.state == ReceiverState.Transmitting:
             self.read_from_model()
 
-    def bias_prediction(self):
-        x_pred = self.x_train[[1]]
+    def label_predict(self, x_pred):
         prediction = self.predict(x_pred)
         # TODO: must return max element only
         return prediction[0].index(max(prediction[0]))
 
     def read_from_model(self):
 
-        pred = self.bias_prediction()
+        pred = self.label_predict()
 
         if self.frame_count == 0:
             self.frame_start = pred
@@ -238,13 +230,44 @@ class Receiver(Client):
     def calibrate(self):
         self.frame += 1
 
-    def craft(self):
-        found = False
-        s = 0
-        label = self.bias_prediction()
-        while not found and s < FUZZMAX:
-            image = 
-        seven2one()
+    def create_sample(self, image):
+        x_train = numpy.array([image])
+        x_train = x_train.astype('float32')
+        x_train /= 255
+        return x_train[[0]]
+
+    def craft():
+
+        xB_sample = self.create_sample(self.image)
+        yB_label = self.label_predict(xB_sample)
+
+        imageT = cancelFromLeft(self.image, 0.5)
+        xT_sample = self.create_sample(imageT)
+        yT_label = self.label_predict(xT_sample)
+
+        alpha, y0_label, y1_label = self.search(self.image, yB_label, yT_label, 0, 0.5)
+
+        xF_image = cancelFromLeft(self.image, alpha)
+        x_train = numpy.array([xF_image, xF_image])
+        y_train = numpy.array([y_label])
+        x_train = x_train.astype('float32')
+        x_train /= 255
+
+
+    def search(self, y0_label, y1_label, alpha_min, alpha_max):
+
+        assert(y0_label != y1_label)
+
+        if alpha_max < alpha_min + SEARCH_THREASHOLD:
+            return alpha_min, y0_label, y1_label
+
+        imageM = cancelFromLeft(self.image, (alpha_min + alpha_max)/2)
+        xM_sample = self.create_sample(imageM)
+        yM_label = self.label_predict(x1_sample)
+        if y0_label != yM_label:
+            return self.search(y0_label, yM_label, alpha_min, (alpha_min + alpha_max)/2)
+        else
+            return self.search(yM_label, y1_label, (alpha_min + alpha_max)/2, alpha_max)
 
 class Observer(Client):
 
