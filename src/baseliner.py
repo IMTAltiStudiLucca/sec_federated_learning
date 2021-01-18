@@ -96,7 +96,7 @@ def cancelFromLeft(image, alpha):
 ## Cancel the picture from top
 def cancelFromTop(image, alpha):
     assert(0 <= alpha <= 1)
-    new_image = image.copy()
+    new_image = squarize(image.copy())
     tbr = len(new_image) * len(new_image[0]) * alpha
     for i in range(len(new_image)):
         for j in range(len(new_image[i])):
@@ -104,7 +104,7 @@ def cancelFromTop(image, alpha):
                 tbr -= 1
                 new_image[i][j] = 0
 
-    return new_image
+    return linearize(new_image)
 
 
 ## shift position
@@ -223,23 +223,11 @@ def extract_images(n, m, l):
         if label == l:
             draw_digit(image, i)
 
-def seven2one(s):
-
-    color = 0
-    p = {
-        'x' : [10,11,10,11,9,10,11,9,10,11,8,9,10,8,9,10,8,9,10,7,8,9,7,8,9],
-        'y' : [7,7,8,8,9,9,9,10,10,10,11,11,11,12,12,12,13,13,13,14,14,14,15,15,15]
-    }
-
-    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[42]
-
-    for i in range(s):
-        image = baseline_set_pixel(image, color, p['x'][i], p['y'][i])
-
-    return image
-
 if __name__ == "__main__":
-    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[42]
+    # extract_images(0, 1000, 8)
+    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[404]
     # draw_digit(cancelFromLeft(image,0.6), 123)
-    print_digit(cancelFromLeft(image,0.6))
+    original = squarize(cancelFromLeft(linearize(image),0.42))
+    print_digit(original)
+    print(linearize(image))
     # dotted_zero()

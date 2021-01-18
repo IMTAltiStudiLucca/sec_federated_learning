@@ -11,3 +11,4 @@ setup:
   num_of_epochs: 10
   random_clients: 0.5
   save_dir: ../runs
+

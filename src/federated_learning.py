@@ -518,7 +518,7 @@ class Client:
 
         for data, target in train_dl:
             output = self.model(data)
-            logging.debug("N. OF CORRECT INSTANCES: {}".format(correct))
+            # logging.debug("N. OF CORRECT INSTANCES: {}".format(correct))
             loss = self.criterion_info(output, target)
             self.optimizer_info.zero_grad()
             loss.backward()
