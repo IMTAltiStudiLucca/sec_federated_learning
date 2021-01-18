@@ -121,7 +121,8 @@ class Sender(Client):
         logging.debug("Sender: frame_count = %s", self.frame_count)
 
         if self.frame_count == 0:
-            self.frame_start = self.label_prediction()
+            x_pred = torch.from_numpy(self.x_train[[0]])
+            self.frame_start = self.label_predict(x_pred)
             logging.info("Sender: frame starts with %s", self.frame_start)
             self.bit = random.randint(0,1)
             logging.info("Sender: SENDING %s", self.bit)
