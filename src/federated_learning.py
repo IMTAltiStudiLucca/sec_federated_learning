@@ -65,44 +65,44 @@ class Net2nn(nn.Module):
         model_clone.fc3.bias.data = self.fc3.bias.data.clone()
         return model_clone
 
-class CNN(nn.Module): 
+class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
-        
+
         # Convolution 1
         self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=1, padding=0)
         self.relu1 = nn.ReLU()
-        
+
         # Max pool 1
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
-     
+
         # Convolution 2
         self.cnn2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=0)
         self.relu2 = nn.ReLU()
-        
+
         # Max pool 2
         self.maxpool2 = nn.MaxPool2d(kernel_size=2)
-        
+
         # Fully connected 1
-        self.fc1 = nn.Linear(32 * 5 * 5, 10) 
-    
+        self.fc1 = nn.Linear(32 * 5 * 5, 10)
+
     def forward(self, x):
         # Set 1
         out = self.cnn1(x)
         out = self.relu1(out)
         out = self.maxpool1(out)
-        
+
         # Set 2
         out = self.cnn2(out)
         out = self.relu2(out)
         out = self.maxpool2(out)
-        
+
         #Flatten
         out = out.view(out.size(0), -1)
 
         #Dense
         out = self.fc1(out)
-        
+
         return out
     def clone(self):
         model_clone = Net2nn()
@@ -258,7 +258,7 @@ class Server:
         if self.network_type == 'NN':
             self.main_model = Net2nn()
         elif self.network_type == 'CNN':
-            logging.info('network_type: {}'.format(self.network_type)) 
+            logging.info('network_type: {}'.format(self.network_type))
             self.main_model = CNN()
 
         if saved:
@@ -276,12 +276,12 @@ class Server:
 
     def training_clients(self):
         logging.debug("Server: training_clients()")
-        
+
         self.selected_clients = random.sample(self.list_of_clients, math.floor(
             len(self.list_of_clients)*self.random_clients))
-        
+
         logging.debug("Server: selected clients %s", self.selected_clients)
-        
+
         if self.multiprocessing:
             processes = []
             for i,c in enumerate(self.selected_clients):
@@ -319,7 +319,7 @@ class Server:
 
                 fc2_mean_weight += c.model.fc2.weight.data.clone()
                 fc2_mean_bias += c.model.fc2.bias.data.clone()
- 
+
                 fc3_mean_weight += c.model.fc3.weight.data.clone()
                 fc3_mean_bias += c.model.fc3.bias.data.clone()
 
@@ -359,7 +359,7 @@ class Server:
 
                 cnn2_mean_weight += c.model.cnn2.weight.data.clone()
                 cnn2_mean_bias += c.model.cnn2.bias.data.clone()
- 
+
                 fc1_mean_weight += c.model.fc1.weight.data.clone()
                 fc1_mean_bias += c.model.fc1.bias.data.clone()
 
@@ -437,7 +437,7 @@ class Client:
         # now we are passing them while instantiate the class
 
         logging.debug("Client: x_train : %s = %s | y_train : %s = %s", type(x_train), x_train.shape, type(y_train), y_train.shape)
-        
+
         x_train, y_train, x_test, y_test = map(
             torch.tensor, (x_train, y_train, x_test, y_test))
         y_train = y_train.type(torch.LongTensor)
@@ -477,7 +477,7 @@ class Client:
             self.update_model_weights_nn(main_model)
         elif self.network_type == 'CNN':
             self.update_model_weights_cnn(main_model)
-    
+
     def update_model_weights_nn(self,main_model):
         with torch.no_grad():
             self.model.fc1.weight.data = main_model.fc1.weight.data.clone()
@@ -486,7 +486,7 @@ class Client:
             self.model.fc1.bias.data = main_model.fc1.bias.data.clone()
             self.model.fc2.bias.data = main_model.fc2.bias.data.clone()
             self.model.fc3.bias.data = main_model.fc3.bias.data.clone()
-    
+
     def update_model_weights_cnn(self,main_model):
         with torch.no_grad():
             self.model.cnn1.weight.data = main_model.cnn1.weight.data.clone()
@@ -494,7 +494,7 @@ class Client:
             self.model.fc1.weight.data = main_model.fc1.weight.data.clone()
             self.model.cnn1.bias.data = main_model.cnn1.bias.data.clone()
             self.model.cnn2.bias.data = main_model.cnn2.bias.data.clone()
-            self.model.fc1.bias.data = main_model.fc1.bias.data.clone()        
+            self.model.fc1.bias.data = main_model.fc1.bias.data.clone()
 
     def call_training(self, n_of_epoch):
         train_ds = TensorDataset(self.x_train, self.y_train)
@@ -508,7 +508,7 @@ class Client:
             train_loss, train_accuracy = self.train(train_dl)
             test_loss, test_accuracy = self.validation(test_dl)
 
-            logging.info("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
+            logging.debug("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
 
     def train(self, train_dl):
         logging.debug("INSIDE THE TRAINING CLIENT {}".format(self.id))
@@ -552,6 +552,7 @@ class Client:
         self.model.eval()
         with torch.no_grad():
             if self.network_type == 'CNN':
+                logging.debug("Client: predict CNN")
                 data = data.reshape(-1,1,28,28)
             return self.model(data)
 

@@ -82,7 +82,7 @@ def baseline_change_brightness(image, byte):
 ## Cancel the picture from left
 def cancelFromLeft(image, alpha):
     assert(0 <= alpha <= 1)
-    new_image = image.copy()
+    new_image = squarize(image.copy())
     tbr = len(new_image) * len(new_image[0]) * alpha
     for j in range(len(new_image[0])):
         for i in range(len(new_image)):
@@ -90,7 +90,7 @@ def cancelFromLeft(image, alpha):
                 tbr -= 1
                 new_image[i][j] = 0
 
-    return new_image
+    return linearize(new_image)
 
 
 ## Cancel the picture from top
@@ -126,6 +126,17 @@ def baseline_overlay_mask(image, mask, alpha=1):
             new_image[i][j] += int(round(mask[i][j] * alpha))
 
     return new_image
+
+def squarize(list, width=28, height=28):
+    assert(len(list) == width * height)
+    matrix = []
+    for h in range(height):
+        row = []
+        for w in range(width):
+            row.append(list[(h * width) + w])
+        matrix.append(row)
+    return matrix
+
 
 def linearize(matrix):
     list = []
@@ -229,5 +240,6 @@ def seven2one(s):
 
 if __name__ == "__main__":
     image = io.load_idx("../data/train-images-idx3-ubyte.gz")[42]
-    draw_digit(cancelFromLeft(image,0.5), 123)
+    # draw_digit(cancelFromLeft(image,0.6), 123)
+    print_digit(cancelFromLeft(image,0.6))
     # dotted_zero()

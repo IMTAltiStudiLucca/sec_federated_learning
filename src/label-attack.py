@@ -4,6 +4,7 @@ import argparse
 import logging
 import numpy
 import enum
+import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 LABEL = 0
 SEARCH_THREASHOLD = 1/(28 * 28)
 
-NTRAIN = 1  # rounds of training
+NTRAIN = 5  # rounds of training
 NTRANS = 10  # rounds for transmission tests
 DELTA = 0.1
 BATCH_SIZE = 32
@@ -83,7 +84,8 @@ def create_sample(image):
     x_train = numpy.array([image])
     x_train = x_train.astype('float32')
     x_train /= 255
-    return x_train[0]
+    #return x_train[[0]]
+    return torch.from_numpy(x_train[[0]])
 
 class ReceiverState(enum.Enum):
     Crafting = 1
@@ -206,7 +208,7 @@ class Receiver(Client):
     def label_predict(self, x_pred):
         prediction = self.predict(x_pred)
         # TODO: must return max element only
-        return prediction[0].index(max(prediction[0]))
+        return torch.argmax(prediction)
 
     def read_from_model(self):
 
@@ -242,17 +244,18 @@ class Receiver(Client):
         xT_sample = create_sample(imageT)
         yT_label = self.label_predict(xT_sample)
 
-        alpha, y0_label, y1_label = self.search(self.original, yB_label, yT_label, 0, 0.5)
+        alpha, y0_label, y1_label = self.search(yB_label, yT_label, 0, 0.6)
 
         self.image = cancelFromLeft(self.original, alpha)
-        x_train = numpy.array([self.image, self.image])
-        y_train = numpy.array([y0_label, y1_label])
-        x_train = x_train.astype('float32')
-        x_train /= 255
+        self.x_train = numpy.array([self.image, self.image])
+        self.y_train = numpy.array([y0_label, y1_label])
+        self.x_train = x_train.astype('float32')
+        self.x_train /= 255
 
     def search(self, y0_label, y1_label, alpha_min, alpha_max):
 
-        assert(y0_label != y1_label)
+        logging.info("Searcing between %s and %s", y0_label, y1_label)
+        assert (y0_label != y1_label), "Labels cannot be equal"
 
         if alpha_max < alpha_min + SEARCH_THREASHOLD:
             return alpha_min, y0_label, y1_label
