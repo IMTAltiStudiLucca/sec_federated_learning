@@ -26,8 +26,8 @@ DELTA = 0.0
 BATCH_SIZE = 32
 NSELECTION = 3
 
-SCORE_LOG = 'score.csv'
-EVENT_LOG = 'event.csv'
+SCORE_LOG = 'scoreS.csv'
+EVENT_LOG = 'eventS.csv'
 
 score_dict = {
         'X': [],

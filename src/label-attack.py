@@ -18,15 +18,15 @@ ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 LABEL = 0
 SEARCH_THREASHOLD = 1/(28 * 28)
 
-NTRAIN = 200  # rounds of training
+NTRAIN = 1  # rounds of training
 NTRANS = 10  # rounds for transmission tests
 DELTA = 0.1
 BATCH_SIZE = 32
 NSELECTION = 3
 FUZZMAX = 26
 
-SCORE_LOG = 'score.csv'
-EVENT_LOG = 'event.csv'
+SCORE_LOG = 'scoreL.csv'
+EVENT_LOG = 'eventL.csv'
 
 score_dict = {
         'X': [],
@@ -79,6 +79,12 @@ def slope(y):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+def create_sample(image):
+    x_train = numpy.array([image])
+    x_train = x_train.astype('float32')
+    x_train /= 255
+    return x_train[0]
+
 class ReceiverState(enum.Enum):
     Crafting = 1
     Calibrating = 2
@@ -87,14 +93,14 @@ class ReceiverState(enum.Enum):
 
 class Sender(Client):
 
-    def __init__(self,x_bias0,x_bias1,y_label0,y_label1,frame,replay):
+    def __init__(self,receiverImage,y0_label,y1_label,frame):
         self.bit = None
         self.sent = False
         self.frame_count = -1
         self.frame = frame
-        self.replay_model = replay
-        x_train = numpy.array([x_bias0,x_bias1])
-        y_train = numpy.array([y_label0,y_label1])
+        self.frame_start = None
+        x_train = numpy.array([receivedImage,receivedImage])
+        y_train = numpy.array([y0_label,y1_label])
         x_train = x_train.astype('float32')
         x_train /= 255
         super().__init__("Sender",x_train, y_train, x_train, y_train)
@@ -112,15 +118,14 @@ class Sender(Client):
         logging.debug("Sender: frame_count = %s", self.frame_count)
 
         if self.frame_count == 0:
-            pred = self.bias_prediction()
-            logging.info("Sender: frame starts at %s", pred)
+            self.frame_start = self.label_prediction()
+            logging.info("Sender: frame starts with %s", self.frame_start)
             self.bit = random.randint(0,1)
             logging.info("Sender: SENDING %s", self.bit)
 
         self.frame_count = (self.frame_count + 1) % self.frame
 
-    def bias_prediction(self):
-        x_pred = self.x_train[[1]]
+    def label_predict(self, x_pred):
         prediction = self.predict(x_pred)
         # TODO: must return max element only
         return prediction[0].index(max(prediction[0]))
@@ -129,15 +134,21 @@ class Sender(Client):
     def send_to_model(self, n_of_epoch):
 
             if self.bit == 1:
+                # change prediction
 
                 logging.info("Sender: injecting bias 1")
 
+                if self.frame_start == self.y_train[[0]]:
+                    y_train_trans = self.y_train[1:2]
+                else:
+                    y_train_trans = self.y_train[0:1]
+
                 # bias injection dataset
-                train_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                train_ds = TensorDataset(self.x_train[0:1], y_train_trans)
                 train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
                 # bias testing dataset
-                test_ds = TensorDataset(self.x_train[1:2], self.y_train[1:2])
+                test_ds = TensorDataset(self.x_train[0:1], y_train_trans)
                 test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
                 for epoch in range(n_of_epoch):
@@ -148,32 +159,24 @@ class Sender(Client):
             else:
 
                 logging.info("Sender: injecting bias 0")
-
-                # bias injection dataset
-                train_ds = TensorDataset(self.x_train[0:1], self.y_train[0:1])
-                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
-
-                # bias testing dataset
-                test_ds = TensorDataset(self.x_train[0:1], self.y_train[0:1])
-                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
-
-                for epoch in range(n_of_epoch):
-
-                    train_loss, train_accuracy = self.train(train_dl)
-                    test_loss, test_accuracy = self.validation(test_dl)
+                # do nothing, prediction should stay unchanged
 
 class Receiver(Client):
 
-    def __init__(self, image):
+    def __init__(self, oImage):
         self.bit = None
-        self.image = image
+        self.original = oImage
+        self.image = None
         self.selection_count = 0
         self.frame = 0
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
         self.state = ReceiverState.Crafting
-        super().__init__("Receiver",x_train, y_train, x_train, y_train)
+        x_train = numpy.array([])
+        y_train = numpy.array([])
+        x_train = x_train.astype('float32')
+        super().__init__("Receiver", x_train, y_train, x_train, y_train)
 
     def call_training(self,n_of_epoch):
         logging.debug("Receiver: call_training()")
@@ -211,15 +214,15 @@ class Receiver(Client):
 
         if self.frame_count == 0:
             self.frame_start = pred
-            logging.info("Receiver: frame starts at = %s", pred)
+            logging.info("Receiver: frame starts with = %s", pred)
         elif self.frame_count == self.frame - 1:
             self.frame_end = pred
-            logging.info("Receiver: frame ends at = %s", pred)
+            logging.info("Receiver: frame ends with = %s", pred)
 
-            if self.frame_start + DELTA < self.frame_end:
-                self.bit = 1
-            else:
+            if self.frame_start == self.frame_end:
                 self.bit = 0
+            else:
+                self.bit = 1
             logging.info("Receiver: RECEIVED: %s", self.bit)
         else:
             pass
@@ -230,29 +233,22 @@ class Receiver(Client):
     def calibrate(self):
         self.frame += 1
 
-    def create_sample(self, image):
-        x_train = numpy.array([image])
-        x_train = x_train.astype('float32')
-        x_train /= 255
-        return x_train[[0]]
+    def craft(self):
 
-    def craft():
-
-        xB_sample = self.create_sample(self.image)
+        xB_sample = create_sample(self.original)
         yB_label = self.label_predict(xB_sample)
 
-        imageT = cancelFromLeft(self.image, 0.5)
-        xT_sample = self.create_sample(imageT)
+        imageT = cancelFromLeft(self.original, 0.5)
+        xT_sample = create_sample(imageT)
         yT_label = self.label_predict(xT_sample)
 
-        alpha, y0_label, y1_label = self.search(self.image, yB_label, yT_label, 0, 0.5)
+        alpha, y0_label, y1_label = self.search(self.original, yB_label, yT_label, 0, 0.5)
 
-        xF_image = cancelFromLeft(self.image, alpha)
-        x_train = numpy.array([xF_image, xF_image])
-        y_train = numpy.array([y_label])
+        self.image = cancelFromLeft(self.original, alpha)
+        x_train = numpy.array([self.image, self.image])
+        y_train = numpy.array([y0_label, y1_label])
         x_train = x_train.astype('float32')
         x_train /= 255
-
 
     def search(self, y0_label, y1_label, alpha_min, alpha_max):
 
@@ -261,25 +257,24 @@ class Receiver(Client):
         if alpha_max < alpha_min + SEARCH_THREASHOLD:
             return alpha_min, y0_label, y1_label
 
-        imageM = cancelFromLeft(self.image, (alpha_min + alpha_max)/2)
-        xM_sample = self.create_sample(imageM)
+        imageM = cancelFromLeft(self.original, (alpha_min + alpha_max)/2)
+        xM_sample = create_sample(imageM)
         yM_label = self.label_predict(x1_sample)
         if y0_label != yM_label:
             return self.search(y0_label, yM_label, alpha_min, (alpha_min + alpha_max)/2)
-        else
+        else:
             return self.search(yM_label, y1_label, (alpha_min + alpha_max)/2, alpha_max)
 
 class Observer(Client):
 
-    def __init__(self,x_bias0,x_bias1,y_label):
+    def __init__(self):
         self.frame_count = 0
         self.frame = 0
         self.x = 0
-        x_train = numpy.array([x_sample,x_biased])
-        y_train = numpy.array([y_label,y_label])
+        x_train = numpy.array([])
+        y_train = numpy.array([])
         x_train = x_train.astype('float32')
-        x_train /= 255
-        super().__init__("Observer",x_train, y_train, x_train, y_train)
+        super().__init__("Observer", x_train, y_train, x_train, y_train)
 
     # Covert channel send
     def call_training(self,n_of_epoch):
@@ -291,30 +286,8 @@ class Observer(Client):
     def update_model_weights(self,main_model):
         logging.debug("Observer: update_model_weights()")
         super().update_model_weights(main_model)
-        pred = self.bias_prediction()
-
-        logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
-
-        update_plot(self.x, pred)
-        log_score(self.x, pred)
-
-        if self.frame > 0:
-            if self.frame_count == 0:
-                add_vline(self.x)
-                log_event(self.x, 'Frame start')
-            self.frame_count = (self.frame_count + 1) % self.frame
 
         self.x += 1
-
-    def bias_prediction(self):
-        x_pred = self.x_train[[1]]
-        prediction = self.predict(x_pred)
-        return prediction[0][LABEL]
-
-def global_bias_prediction(server, client):
-    x_pred = client.x_train[[1]]
-    prediction = server.predict(x_pred)
-    return prediction[0][LABEL]
 
 def main():
     # 1. parse arguments
@@ -326,7 +299,7 @@ def main():
     setup = Setup(args.conf_file)
 
     # 2.1. add observer
-    observer = Observer(ORIGINAL, BASELINE, LABEL)
+    observer = Observer()
     setup.add_clients(observer)
 
     # 3. run N rounds OR load pre-trained models
@@ -334,7 +307,7 @@ def main():
     #setup.load("...")
 
     # 4. create Receiver
-    receiver = Receiver(ORIGINAL, BASELINE, LABEL)
+    receiver = Receiver(ORIGINAL)
     setup.add_clients(receiver)
     log_event(observer.x, 'Receiver added')
 
@@ -348,7 +321,7 @@ def main():
     logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
 
     # 6. create sender
-    sender = Sender(ORIGINAL, BASELINE, LABEL,receiver.frame,receiver.replay_model)
+    sender = Sender(receiver.image, receiver.y_train[[0]], receiver.y_train[[1]], receiver.frame)
     setup.add_clients(sender)
     log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)
