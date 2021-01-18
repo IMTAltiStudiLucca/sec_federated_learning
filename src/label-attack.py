@@ -102,7 +102,7 @@ class Sender(Client):
         self.frame_count = -1
         self.frame = frame
         self.frame_start = None
-        x_train = numpy.array([receivedImage,receivedImage])
+        x_train = numpy.array([receiverImage,receiverImage])
         y_train = numpy.array([y0_label,y1_label])
         x_train = x_train.astype('float32')
         x_train /= 255
@@ -214,7 +214,8 @@ class Receiver(Client):
 
     def read_from_model(self):
 
-        pred = self.label_predict()
+        x_pred = torch.from_numpy(self.x_train[[0]])
+        pred = self.label_predict(x_pred)
 
         if self.frame_count == 0:
             self.frame_start = pred
