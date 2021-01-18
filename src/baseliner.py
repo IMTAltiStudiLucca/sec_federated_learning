@@ -227,7 +227,7 @@ if __name__ == "__main__":
     # extract_images(0, 1000, 8)
     image = io.load_idx("../data/train-images-idx3-ubyte.gz")[404]
     # draw_digit(cancelFromLeft(image,0.6), 123)
-    original = squarize(cancelFromLeft(linearize(image),0.42))
+    original = squarize(cancelFromLeft(linearize(image),0.306796875))
     print_digit(original)
     print(linearize(image))
     # dotted_zero()
