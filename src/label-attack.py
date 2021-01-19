@@ -190,7 +190,7 @@ class Receiver(Client):
             self.selection_count += 1
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
-                self.state = ReceiverState.Transmitting
+                self.state = ReceiverState.Ready
         else:
             pass
 
@@ -282,6 +282,7 @@ class Observer(Client):
         self.frame_count = 0
         self.frame = 0
         self.x = 0
+        self.sample = None
         x_train = numpy.array([])
         y_train = numpy.array([])
         x_train = x_train.astype('float32')
@@ -294,9 +295,24 @@ class Observer(Client):
     def set_frame(self, frame):
         self.frame = frame
 
+    def set_sample(self,s):
+        self.sample = s
+
     def update_model_weights(self,main_model):
         logging.debug("Observer: update_model_weights()")
         super().update_model_weights(main_model)
+
+        if self.sample != None:
+            pred = self.predict(self.sample)
+            logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
+            update_plot(self.x, torch.argmax(pred))
+            log_score(self.x, pred)
+
+        if self.frame > 0:
+            if self.frame_count == 0:
+                add_vline(self.x)
+                log_event(self.x, 'Frame start')
+            self.frame_count = (self.frame_count + 1) % self.frame
 
         self.x += 1
 
@@ -336,6 +352,8 @@ def main():
     setup.add_clients(sender)
     log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)
+
+    observer.set_sample(create_sample(receiver.image))
 
     # 7. perform channel calibration
 
