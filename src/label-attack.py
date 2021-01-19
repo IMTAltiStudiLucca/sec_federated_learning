@@ -9,6 +9,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import signal
+import pandas
 import sys
 from baseliner import cancelFromLeft
 
@@ -16,7 +17,6 @@ from baseliner import cancelFromLeft
 # Just a 8 (n. 404 in MNIST)
 ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 31, 130, 222, 255, 255, 154, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11, 101, 253, 244, 241, 241, 244, 253, 213, 136, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19, 92, 145, 200, 19, 111, 33, 0, 0, 33, 217, 253, 253, 154, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 242, 241, 81, 55, 5, 8, 0, 0, 0, 0, 81, 253, 241, 154, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 253, 253, 191, 172, 95, 16, 0, 0, 0, 97, 253, 118, 135, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 93, 168, 221, 253, 235, 101, 38, 9, 66, 236, 253, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 108, 218, 150, 253, 188, 174, 239, 167, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 119, 253, 253, 253, 228, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 253, 253, 253, 253, 185, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 50, 139, 158, 191, 191, 241, 253, 196, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 147, 221, 149, 30, 0, 0, 0, 89, 242, 253, 154, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 205, 253, 173, 0, 0, 0, 0, 0, 0, 114, 253, 154, 120, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 126, 253, 183, 17, 0, 0, 0, 0, 0, 0, 17, 224, 185, 237, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 236, 227, 16, 0, 0, 0, 0, 0, 0, 0, 0, 217, 253, 253, 122, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 253, 176, 0, 0, 0, 0, 0, 0, 0, 0, 0, 171, 253, 253, 141, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 143, 253, 220, 37, 0, 0, 0, 0, 0, 0, 0, 0, 142, 253, 253, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 253, 253, 220, 88, 0, 0, 0, 0, 0, 34, 209, 250, 253, 157, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 102, 185, 158, 250, 150, 112, 112, 112, 148, 241, 253, 212, 196, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 20, 155, 253, 253, 253, 253, 253, 216, 135, 25, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 30, 129, 129, 129, 129, 149, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-LABEL = 0
 SEARCH_THREASHOLD = 1/(28 * 28)
 
 NTRAIN = 1  # rounds of training
@@ -96,14 +96,13 @@ class ReceiverState(enum.Enum):
 
 class Sender(Client):
 
-    def __init__(self,receiverImage,y0_label,y1_label,frame):
+    def __init__(self,receiverImage,y_train,frame):
         self.bit = None
         self.sent = False
         self.frame_count = -1
         self.frame = frame
         self.frame_start = None
         x_train = numpy.array([receiverImage,receiverImage])
-        y_train = numpy.array([y0_label,y1_label])
         x_train = x_train.astype('float32')
         x_train /= 255
         super().__init__("Sender",x_train, y_train, x_train, y_train)
@@ -147,6 +146,8 @@ class Sender(Client):
                 else:
                     y_train_trans = self.y_train[0:1]
 
+
+                logging.info("Sender: index %s", y_train_trans)
                 # bias injection dataset
                 train_ds = TensorDataset(self.x_train[0:1], y_train_trans)
                 train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
@@ -189,7 +190,7 @@ class Receiver(Client):
             self.selection_count += 1
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
-                self.state = ReceiverState.Ready
+                self.state = ReceiverState.Transmitting
         else:
             pass
 
@@ -331,7 +332,7 @@ def main():
     logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
 
     # 6. create sender
-    sender = Sender(receiver.image, receiver.y_train[[0]], receiver.y_train[[1]], receiver.frame)
+    sender = Sender(receiver.image, receiver.y_train, receiver.frame)
     setup.add_clients(sender)
     log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)
