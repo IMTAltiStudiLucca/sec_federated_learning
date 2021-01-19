@@ -121,8 +121,8 @@ class Sender(Client):
         logging.debug("Sender: frame_count = %s", self.frame_count)
 
         if self.frame_count == 0:
-            x_pred = torch.from_numpy(self.x_train[[0]])
-            self.frame_start = self.label_predict(x_pred)
+            #x_pred = torch.from_numpy(self.x_train[[0]])
+            self.frame_start = self.label_predict(self.x_train[[0]])
             logging.info("Sender: frame starts with %s", self.frame_start)
             self.bit = random.randint(0,1)
             logging.info("Sender: SENDING %s", self.bit)
@@ -131,6 +131,7 @@ class Sender(Client):
 
     def label_predict(self, x_pred):
         prediction = self.predict(x_pred)
+        logging.debug("Sender: prediction %s", prediction)
         # TODO: must return max element only
         return torch.argmax(prediction)
 
@@ -139,7 +140,6 @@ class Sender(Client):
 
             if self.bit == 1:
                 # change prediction
-
                 logging.info("Sender: injecting bias 1")
 
                 if self.frame_start == self.y_train[[0]]:
