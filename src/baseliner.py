@@ -229,5 +229,7 @@ if __name__ == "__main__":
     # draw_digit(cancelFromLeft(image,0.6), 123)
     original = squarize(cancelFromLeft(linearize(image),0.306796875))
     print_digit(original)
-    print(linearize(image))
+    draw_digit(image, 1234)
+    draw_digit(original, 1235)
+    # print(linearize(image))
     # dotted_zero()

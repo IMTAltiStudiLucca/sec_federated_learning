@@ -115,14 +115,25 @@ def log_event(x, e):
 hl, = plt.plot([], [])
 plt.ylim([20, 55])
 plt.xlim([0, NTRAIN + (NTRANS * 12)])
-plt.xlabel('Time (epochs)', fontdict=font)
-plt.ylabel('Score', fontdict=font)
+plt.xlabel('Time (FL rounds)', fontdict=font)
+plt.ylabel('Prediction', fontdict=font)
 plt.title('Covert Channel Comm. via Score Attack to a FL model', fontdict=font)
 
 
 def update_plot(x, y):
     hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
     hl.set_ydata(numpy.append(hl.get_ydata(), [y]))
+
+
+def add_vline(xv):
+    plt.axvline(x=xv)
+
+
+def signal_handler(sig, frame):
+    save_stats()
+    sys.exit(0)
+
+def save_stats():
     y_values = hl.get_ydata()
     y_min = min(y_values) - DELTA_PLT_Y
     y_max = max(y_values) + DELTA_PLT_Y
@@ -131,20 +142,12 @@ def update_plot(x, y):
     x_min = min(x_values) - DELTA_PLT_X
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
-
-
-def add_vline(xv):
-    plt.axvline(x=xv)
-
-
-def signal_handler(sig, frame):
     plt.savefig('output.png', dpi=300)
     plt.savefig('output.svg', dpi=300)
     sdf = pandas.DataFrame(score_dict)
     sdf.to_csv(SCORE_LOG)
     edf = pandas.DataFrame(event_dict)
     edf.to_csv(EVENT_LOG)
-    sys.exit(0)
 
 
 # compute slope through least square method
@@ -414,21 +417,7 @@ def main():
 
     log_event(observer.x, "ERROR RATE: " + str(error_rate))
 
-    y_values = hl.get_ydata()
-    y_min = min(y_values) - DELTA_PLT_Y
-    y_max = max(y_values) + DELTA_PLT_Y
-    plt.ylim(y_min, y_max)
-    x_values = hl.get_xdata()
-    x_min = min(x_values) - DELTA_PLT_X
-    x_max = max(x_values) + DELTA_PLT_X
-    plt.xlim(x_min, x_max)
-    plt.savefig('output.png', dpi=300)
-    plt.savefig('output.svg', dpi=300)
-
-    sdf = pandas.DataFrame(score_dict)
-    sdf.to_csv(SCORE_LOG)
-    edf = pandas.DataFrame(event_dict)
-    edf.to_csv(EVENT_LOG)
+    save_stats()
 
 
 def check_transmission_success(s, r):

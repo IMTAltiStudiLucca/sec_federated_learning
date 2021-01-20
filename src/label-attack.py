@@ -25,7 +25,8 @@ DELTA = 0.1
 ALPHA = 0.42
 BATCH_SIZE = 32
 NSELECTION = 3
-FUZZMAX = 26
+DELTA_PLT_X = 1
+DELTA_PLT_Y = 1
 
 SCORE_LOG = 'scoreL.csv'
 EVENT_LOG = 'eventL.csv'
@@ -60,12 +61,24 @@ def add_vline(xv):
     plt.axvline(x=xv)
 
 def signal_handler(sig, frame):
+    save_stats()
+    sys.exit(0)
+
+def save_stats():
+    y_values = hl.get_ydata()
+    y_min = min(y_values) - DELTA_PLT_Y
+    y_max = max(y_values) + DELTA_PLT_Y
+    plt.ylim(y_min, y_max)
+    x_values = hl.get_xdata()
+    x_min = min(x_values) - DELTA_PLT_X
+    x_max = max(x_values) + DELTA_PLT_X
+    plt.xlim(x_min, x_max)
     plt.savefig('output.png', dpi=300)
+    plt.savefig('output.svg', dpi=300)
     sdf = pandas.DataFrame(score_dict)
     sdf.to_csv(SCORE_LOG)
     edf = pandas.DataFrame(event_dict)
     edf.to_csv(EVENT_LOG)
-    sys.exit(0)
 
 # compute slope through least square method
 def slope(y):
@@ -366,12 +379,8 @@ def main():
         log_event(observer.x, "Transmissions: " + str(successful_transmissions))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
-    plt.savefig('output.png', dpi=300)
 
-    sdf = pandas.DataFrame(score_dict)
-    sdf.to_csv(SCORE_LOG)
-    edf = pandas.DataFrame(event_dict)
-    edf.to_csv(EVENT_LOG)
+    save_stats()
 
 def check_transmission_success(s, r):
     result = 0
