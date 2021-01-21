@@ -483,12 +483,12 @@ def main():
     x_min = min(x_values) - DELTA_PLT_X
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
-    logging.info("FIGURE NAME: %s", os.path.join(setup_env.path, id_tests + '.png'))
+    #logging.info("FIGURE NAME: %s", os.path.join(setup_env.path, id_tests + '.png'))
     plt.savefig(os.path.join(setup_env.path, id_tests + '.png'), dpi=300)
     plt.savefig(os.path.join(setup_env.path, id_tests + '.svg'), dpi=300)
 
     sdf = pandas.DataFrame(score_dict)
-    logging.info("CSV NAME: %s", os.path.join(setup_env.path, SCORE_LOG))
+    #logging.info("CSV NAME: %s", os.path.join(setup_env.path, SCORE_LOG))
     sdf.to_csv(os.path.join(setup_env.path, SCORE_LOG))
     edf = pandas.DataFrame(event_dict)
     edf.to_csv(os.path.join(setup_env.path, EVENT_LOG))
