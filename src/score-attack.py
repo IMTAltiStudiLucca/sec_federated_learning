@@ -407,7 +407,7 @@ class Setup_env:
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         self.settings['saved'] = {"timestamp": timestamp}
-        with open(os.path.join(self.path, 'setup.yaml'), 'w') as fout:
+        with open(os.path.join(self.path, 'setup_tests.yaml'), 'w') as fout:
             yaml.dump(self.settings, fout)
 
     def id_tests(self):
