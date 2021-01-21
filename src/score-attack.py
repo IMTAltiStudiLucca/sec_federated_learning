@@ -11,6 +11,11 @@ import matplotlib.pyplot as plt
 import signal
 import sys
 
+from datetime import datetime
+import yaml
+import os
+
+
 # Just a 0
 ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -363,16 +368,72 @@ def global_bias_prediction(server, client):
     return prediction[0][LABEL]
 
 
+class Setup_env:
+    '''Setup simulation environment from YAML configuration file.
+    '''
+
+    def __init__(self, conf_file):
+        self.conf_file = conf_file
+
+        self.settings = self.load(self.conf_file)
+
+        self.save_tests = self.settings['setup']['save_tests']
+        self.saving_tests_dir = self.settings['setup']['tests_dir']
+        self.prob_selection = self.settings['setup']['prob_sel']
+        self.n_bits = self.settings['setup']['n_bits']
+        self.n_Rcal = self.settings['setup']['n_Rcal']
+        self.saved = False
+
+        if "saved" not in self.settings.keys():
+            self.start_time = datetime.now()
+        else:
+            self.saved = True
+            self.start_time = datetime.strptime(
+                self.settings['saved']['timestamp'], '%Y%m%d%H%M')
+
+        timestamp = self.start_time.strftime("%Y%m%d%H%M")
+        self.path = os.path.join(self.saving_tests_dir, timestamp)
+
+
+    def load(self, conf_file):
+        with open(conf_file) as f:
+            settings = yaml.safe_load(f)
+            return settings
+
+
+    def save(self):
+        timestamp = self.start_time.strftime("%Y%m%d%H%M")
+        self.path = os.path.join(self.saving_tests_dir, timestamp)
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
+        self.settings['saved'] = {"timestamp": timestamp}
+        with open(os.path.join(self.path, 'setup.yaml'), 'w') as fout:
+            yaml.dump(self.settings, fout)
+
+    def id_tests(self):
+        timestamp = self.start_time.strftime("%Y%m%d%H%M")
+        id_tests = "Score-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(self.n_Rcal) + "_" + timestamp
+        return id_tests
+
+
 def main():
     # 1. parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("conf_file", type=str)
     args = parser.parse_args()
 
-    # 2. create Setup
+    # 2.0 Setup environment for saving tests
+    setup_env = Setup_env(args.conf_file)
+    id_tests = setup_env.id_tests()
+    #logging.info("ID Test name: %s", id_tests)
+
+    if setup_env.save_tests:
+        setup_env.save()
+
+    # 2.1 create Setup
     setup = Setup(args.conf_file)
 
-    # 2.1. add observer
+    # 2.2. add observer
     observer = Observer(ORIGINAL, BASELINE, LABEL)
     setup.add_clients(observer)
 
@@ -422,13 +483,15 @@ def main():
     x_min = min(x_values) - DELTA_PLT_X
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
-    plt.savefig('output.png', dpi=300)
-    plt.savefig('output.svg', dpi=300)
+    logging.info("FIGURE NAME: %s", os.path.join(setup_env.path, id_tests + '.png'))
+    plt.savefig(os.path.join(setup_env.path, id_tests + '.png'), dpi=300)
+    plt.savefig(os.path.join(setup_env.path, id_tests + '.svg'), dpi=300)
 
     sdf = pandas.DataFrame(score_dict)
-    sdf.to_csv(SCORE_LOG)
+    logging.info("CSV NAME: %s", os.path.join(setup_env.path, SCORE_LOG))
+    sdf.to_csv(os.path.join(setup_env.path, SCORE_LOG))
     edf = pandas.DataFrame(event_dict)
-    edf.to_csv(EVENT_LOG)
+    edf.to_csv(os.path.join(setup_env.path, EVENT_LOG))
 
 
 def check_transmission_success(s, r):
@@ -439,7 +502,7 @@ def check_transmission_success(s, r):
             result = 1
         else:
             logging.info("Attacker: transmission FAIL")
-            increase_error_rate()
+            increase_error_rate(error_rate)
         s.bit = None
         r.bit = None
     return result
