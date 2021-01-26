@@ -77,6 +77,8 @@ event_dict = {
 
 error_rate = 0
 
+save_path = ""
+
 
 def increase_error_rate(error_rate):
     error_rate += 1
@@ -98,7 +100,7 @@ plt.xlim([0, NTRAIN + (NTRANS * 12)])
 
 plt.xlabel('Time (FL rounds)', fontdict=font)
 plt.ylabel('Prediction', fontdict=font)
-plt.title('Covert Channel Comm. via Score Attack to a FL model', fontdict=font)
+plt.title('Covert Channel Comm. via Label Attack to a FL model', fontdict=font)
 
 
 def update_plot(x, y):
@@ -124,12 +126,12 @@ def save_stats():
     x_min = min(x_values) - DELTA_PLT_X
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
-    plt.savefig('output.png', dpi=300)
-    plt.savefig('output.svg', dpi=300)
+    plt.savefig(save_path + 'output.png', dpi=300)
+    plt.savefig(save_path +'output.svg', dpi=300)
     sdf = pandas.DataFrame(score_dict)
-    sdf.to_csv(SCORE_LOG)
+    sdf.to_csv(save_path + SCORE_LOG)
     edf = pandas.DataFrame(event_dict)
-    edf.to_csv(EVENT_LOG)
+    edf.to_csv(save_path + EVENT_LOG)
 
 
 # compute slope through least square method
@@ -419,9 +421,9 @@ class Setup_env:
 
     def save(self):
         id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True).decode("utf-8").rstrip()
-        logging.info("id folder", id_folder)
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
+        save_path = self.path
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         self.settings['saved'] = {"timestamp": timestamp}
