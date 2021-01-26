@@ -478,9 +478,8 @@ def main():
 
     log_event(observer.x, "ERROR RATE: " + str(error_rate))
 
-<<<<<<< HEAD
     save_stats()
-=======
+
     y_values = hl.get_ydata()
     y_min = min(y_values) - DELTA_PLT_Y
     y_max = max(y_values) + DELTA_PLT_Y
@@ -498,7 +497,6 @@ def main():
     sdf.to_csv(os.path.join(setup_env.path, SCORE_LOG))
     edf = pandas.DataFrame(event_dict)
     edf.to_csv(os.path.join(setup_env.path, EVENT_LOG))
->>>>>>> 43e46f6d6df71de87df4e64fc620eda2a5efce25
 
 
 def check_transmission_success(s, r):
