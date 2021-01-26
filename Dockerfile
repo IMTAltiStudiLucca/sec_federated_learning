@@ -9,4 +9,9 @@ RUN pip install matplotlib
 RUN pip install keras
 RUN pip install torch
 RUN pip install torchvision
-WORKDIR /home/fedexp
+CMD cd /home
+CMD wget https://github.com/fpinell/sec_federated_learning/archive/main.zip
+CMD unzip main.zip
+CMD mv sec_federated_learning-main/* fedexp
+CMD rm -r sec_federated_learning-main
+WORKDIR /home/fedexp/src
