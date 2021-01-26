@@ -15,7 +15,6 @@ from datetime import datetime
 import yaml
 import os
 
-
 # Just a 0
 ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -137,6 +136,7 @@ def add_vline(xv):
 def signal_handler(sig, frame):
     save_stats()
     sys.exit(0)
+
 
 def save_stats():
     y_values = hl.get_ydata()
@@ -397,25 +397,26 @@ class Setup_env:
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, timestamp)
 
-
     def load(self, conf_file):
         with open(conf_file) as f:
             settings = yaml.safe_load(f)
             return settings
 
-
     def save(self):
+        id_folder = os.system('cat / proc / self / cgroup | grep "docker" | sed  s /\\ // \\n / g | tail - 1')
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
-        self.path = os.path.join(self.saving_tests_dir, timestamp)
+        self.path = os.path.join(self.saving_tests_dir, id_folder)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         self.settings['saved'] = {"timestamp": timestamp}
+        self.settings['saved'] = {"id container": id_folder}
         with open(os.path.join(self.path, 'setup_tests.yaml'), 'w') as fout:
             yaml.dump(self.settings, fout)
 
     def id_tests(self):
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
-        id_tests = "Score-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(self.n_Rcal) + "_" + timestamp
+        id_tests = "Score-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(
+            self.n_Rcal) + "_" + timestamp
         return id_tests
 
 
@@ -428,7 +429,7 @@ def main():
     # 2.0 Setup environment for saving tests
     setup_env = Setup_env(args.conf_file)
     id_tests = setup_env.id_tests()
-    #logging.info("ID Test name: %s", id_tests)
+    # logging.info("ID Test name: %s", id_tests)
 
     if setup_env.save_tests:
         setup_env.save()
@@ -488,12 +489,12 @@ def main():
     x_min = min(x_values) - DELTA_PLT_X
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
-    #logging.info("FIGURE NAME: %s", os.path.join(setup_env.path, id_tests + '.png'))
+    # logging.info("FIGURE NAME: %s", os.path.join(setup_env.path, id_tests + '.png'))
     plt.savefig(os.path.join(setup_env.path, id_tests + '.png'), dpi=300)
     plt.savefig(os.path.join(setup_env.path, id_tests + '.svg'), dpi=300)
 
     sdf = pandas.DataFrame(score_dict)
-    #logging.info("CSV NAME: %s", os.path.join(setup_env.path, SCORE_LOG))
+    # logging.info("CSV NAME: %s", os.path.join(setup_env.path, SCORE_LOG))
     sdf.to_csv(os.path.join(setup_env.path, SCORE_LOG))
     edf = pandas.DataFrame(event_dict)
     edf.to_csv(os.path.join(setup_env.path, EVENT_LOG))
