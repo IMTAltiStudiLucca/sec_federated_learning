@@ -417,11 +417,13 @@ class Setup_env:
             return settings
 
     def save(self):
+        id_folder = os.system('cat / proc / self / cgroup | grep "docker" | sed  s /\\ // \\n / g | tail - 1')
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
-        self.path = os.path.join(self.saving_tests_dir, timestamp)
+        self.path = os.path.join(self.saving_tests_dir, id_folder)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         self.settings['saved'] = {"timestamp": timestamp}
+        self.settings['saved'] = {"id container": id_folder}
         with open(os.path.join(self.path, 'setup_tests.yaml'), 'w') as fout:
             yaml.dump(self.settings, fout)
 
