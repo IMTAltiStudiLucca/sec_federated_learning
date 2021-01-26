@@ -16,6 +16,7 @@ from baseliner import cancelFromLeft
 from datetime import datetime
 import yaml
 import os
+import subprocess
 
 
 # Just a 8 (n. 404 in MNIST)
@@ -417,7 +418,8 @@ class Setup_env:
             return settings
 
     def save(self):
-        id_folder = os.system('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1')
+        id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True)
+        logging.info("id folder", id_folder)
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
         if not os.path.exists(self.path):
