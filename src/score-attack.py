@@ -392,9 +392,9 @@ class Setup_env:
         else:
             self.saved = True
             self.start_time = datetime.strptime(
-                self.settings['saved']['timestamp'], '%Y%m%d%H%M')
+                self.settings['saved']['timestamp'], '%Y%m%d%H%M%S')
 
-        timestamp = self.start_time.strftime("%Y%m%d%H%M")
+        timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, timestamp)
 
 
@@ -405,7 +405,7 @@ class Setup_env:
 
 
     def save(self):
-        timestamp = self.start_time.strftime("%Y%m%d%H%M")
+        timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, timestamp)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
@@ -414,7 +414,7 @@ class Setup_env:
             yaml.dump(self.settings, fout)
 
     def id_tests(self):
-        timestamp = self.start_time.strftime("%Y%m%d%H%M")
+        timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         id_tests = "Score-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(self.n_Rcal) + "_" + timestamp
         return id_tests
 
