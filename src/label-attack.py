@@ -417,7 +417,7 @@ class Setup_env:
             return settings
 
     def save(self):
-        id_folder = os.system('cat / proc / self / cgroup | grep "docker" | sed  s /\\\\ // \\\\n / g | tail - 1')
+        id_folder = os.system('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1')
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
         if not os.path.exists(self.path):
