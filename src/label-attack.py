@@ -424,6 +424,7 @@ class Setup_env:
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
         save_path = self.path
+        logging.info("save path %s", save_path)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         self.settings['saved'] = {"timestamp": timestamp}
