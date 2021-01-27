@@ -9,9 +9,13 @@ RUN pip install matplotlib
 RUN pip install keras
 RUN pip install torch
 RUN pip install torchvision
-CMD cd /home
-CMD wget https://github.com/fpinell/sec_federated_learning/archive/main.zip
-CMD unzip main.zip
-CMD mv sec_federated_learning-main/* fedexp
-CMD rm -r sec_federated_learning-main
-WORKDIR /home/fedexp/src
+RUN apt-get update && apt-get install -y wget unzip
+ENTRYPOINT cd /home && \
+ wget https://github.com/fpinell/sec_federated_learning/archive/main.zip && \
+ unzip main.zip && \
+ mv sec_federated_learning-main/* fedexp && \
+ rm main.zip && \
+ rm -r sec_federated_learning-main && \
+ cd /home/fedexp/src && \
+ reset && \
+ python label-attack.py attack_setup.yaml
