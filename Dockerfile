@@ -1,5 +1,7 @@
 FROM tensorflow/tensorflow
 
+ARG attack_script
+ENV script=$attack_script
 RUN mkdir /home/fedexp
 RUN python -m pip install --upgrade pip
 RUN pip install pandas
@@ -17,5 +19,4 @@ ENTRYPOINT cd /home && \
  rm main.zip && \
  rm -r sec_federated_learning-main && \
  cd /home/fedexp/src && \
- reset && \
- python label-attack.py attack_setup.yaml
+ python $script attack_setup.yaml
