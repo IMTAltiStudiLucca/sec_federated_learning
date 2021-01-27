@@ -101,6 +101,7 @@ event_dict = {
 
 error_rate = 0
 
+save_path = ""
 
 def increase_error_rate(error_rate):
     error_rate += 1
@@ -139,6 +140,7 @@ def signal_handler(sig, frame):
 
 
 def save_stats():
+    logging.info("SAVE STATS")
     y_values = hl.get_ydata()
     y_min = min(y_values) - DELTA_PLT_Y
     y_max = max(y_values) + DELTA_PLT_Y
@@ -147,12 +149,13 @@ def save_stats():
     x_min = min(x_values) - DELTA_PLT_X
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
-    plt.savefig('output.png', dpi=300)
-    plt.savefig('output.svg', dpi=300)
+    logging.info("save path: %s", save_path + "/output")
+    plt.savefig(save_path + '/output.png', dpi=300)
+    plt.savefig(save_path +'/output.svg', dpi=300)
     sdf = pandas.DataFrame(score_dict)
-    sdf.to_csv(SCORE_LOG)
+    sdf.to_csv(save_path + '/' + SCORE_LOG)
     edf = pandas.DataFrame(event_dict)
-    edf.to_csv(EVENT_LOG)
+    edf.to_csv(save_path + '/' +  EVENT_LOG)
 
 
 # compute slope through least square method
@@ -403,9 +406,12 @@ class Setup_env:
             return settings
 
     def save(self):
-        id_folder = os.system('cat / proc / self / cgroup | grep "docker" | sed  s /\\ // \\n / g | tail - 1')
+        id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True).decode("utf-8").rstrip()
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
+        global save_path
+        save_path = self.path
+        logging.info("save path %s", save_path)
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         self.settings['saved'] = {"timestamp": timestamp}
