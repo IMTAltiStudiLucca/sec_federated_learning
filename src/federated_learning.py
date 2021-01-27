@@ -38,9 +38,11 @@ import argparse
 
 import multiprocessing as mp
 
-def worker(c,num_of_epochs):
+
+def worker(c, num_of_epochs):
     logging.debug("Launching training for client: {}".format(c.id))
     c.call_training(num_of_epochs)
+
 
 class Net2nn(nn.Module):
     def __init__(self):
@@ -65,19 +67,22 @@ class Net2nn(nn.Module):
         model_clone.fc3.bias.data = self.fc3.bias.data.clone()
         return model_clone
 
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
 
         # Convolution 1
-        self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=1, padding=0)
+        self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16,
+                              kernel_size=3, stride=1, padding=0)
         self.relu1 = nn.ReLU()
 
         # Max pool 1
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
 
         # Convolution 2
-        self.cnn2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=0)
+        self.cnn2 = nn.Conv2d(in_channels=16, out_channels=32,
+                              kernel_size=3, stride=1, padding=0)
         self.relu2 = nn.ReLU()
 
         # Max pool 2
@@ -97,13 +102,14 @@ class CNN(nn.Module):
         out = self.relu2(out)
         out = self.maxpool2(out)
 
-        #Flatten
+        # Flatten
         out = out.view(out.size(0), -1)
 
-        #Dense
+        # Dense
         out = self.fc1(out)
 
         return out
+
     def clone(self):
         model_clone = Net2nn()
         model_clone.cnn1.weight.data = self.cnn1.weight.data.clone()
@@ -113,6 +119,7 @@ class CNN(nn.Module):
         model_clone.cnn2.bias.data = self.cnn2.bias.data.clone()
         model_clone.fc1.bias.data = self.fc1.bias.data.clone()
         return model_clone
+
 
 class Setup:
     '''Read the dataset, instantiate the clients and the server
@@ -148,7 +155,8 @@ class Setup:
         timestamp = self.start_time.strftime("%Y%m%d%H%M")
         self.path = os.path.join(self.saving_dir, timestamp)
 
-        logging.debug("Setup: creating client with path %s (%s)", self.path, self.saved)
+        logging.debug("Setup: creating client with path %s (%s)",
+                      self.path, self.saved)
 
         self.list_of_clients = []
         self.X_train, self.y_train, self.X_test, self.y_test = self.__load_dataset()
@@ -158,18 +166,19 @@ class Setup:
         self.server = Server(self.list_of_clients, self.random_clients,
                              self.learning_rate, self.num_of_epochs,
                              self.batch_size, self.momentum,
-                             self.saved, self.path,self.multiprocessing,self.network_type)
+                             self.saved, self.path, self.multiprocessing, self.network_type)
 
     def load(self, conf_file):
         with open(conf_file) as f:
             settings = yaml.load(f, Loader=yaml.FullLoader)
             return settings
 
-    def run(self, federated_runs = None ):
+    def run(self, federated_runs=None):
         if federated_runs != None:
             self.federated_runs = federated_runs
         for i in range(self.federated_runs):
-            logging.info("Setup: starting run of the federated learning number %s", (i+1))
+            logging.info(
+                "Setup: starting run of the federated learning number %s", (i + 1))
             self.server.training_clients()
             self.server.update_averaged_weights()
             self.server.send_weights()
@@ -207,7 +216,7 @@ class Setup:
 
         for i in range(self.n_clients):
             c = Client(str(i), X_trains[i], y_trains[i], X_tests[i], y_tests[i], self.learning_rate,
-                       self.num_of_epochs, self.batch_size, self.momentum, self.saved, self.path,self.network_type)
+                       self.num_of_epochs, self.batch_size, self.momentum, self.saved, self.path, self.network_type)
             self.list_of_clients.append(c)
 
     def add_clients(self, client):
@@ -242,7 +251,7 @@ class Server:
     def __init__(self, list_of_clients, random_clients,
                  learning_rate=0.01, num_of_epochs=10,
                  batch_size=32, momentum=0.9,
-                 saved=False, path=None,multiprocessing=0,
+                 saved=False, path=None, multiprocessing=0,
                  network_type='NN'):
 
         self.list_of_clients = list_of_clients
@@ -278,14 +287,14 @@ class Server:
         logging.debug("Server: training_clients()")
 
         self.selected_clients = random.sample(self.list_of_clients, math.floor(
-            len(self.list_of_clients)*self.random_clients))
+            len(self.list_of_clients) * self.random_clients))
 
         logging.debug("Server: selected clients %s", self.selected_clients)
 
         if self.multiprocessing:
             processes = []
-            for i,c in enumerate(self.selected_clients):
-                p = mp.Process(target=worker, args=(c,self.num_of_epochs))
+            for i, c in enumerate(self.selected_clients):
+                p = mp.Process(target=worker, args=(c, self.num_of_epochs))
                 processes.append(p)
                 p.start()
             for p in processes:
@@ -323,14 +332,14 @@ class Server:
                 fc3_mean_weight += c.model.fc3.weight.data.clone()
                 fc3_mean_bias += c.model.fc3.bias.data.clone()
 
-            fc1_mean_weight = fc1_mean_weight/len(self.selected_clients)
-            fc1_mean_bias = fc1_mean_bias/len(self.selected_clients)
+            fc1_mean_weight = fc1_mean_weight / len(self.selected_clients)
+            fc1_mean_bias = fc1_mean_bias / len(self.selected_clients)
 
-            fc2_mean_weight = fc2_mean_weight/len(self.selected_clients)
-            fc2_mean_bias = fc2_mean_bias/len(self.selected_clients)
+            fc2_mean_weight = fc2_mean_weight / len(self.selected_clients)
+            fc2_mean_bias = fc2_mean_bias / len(self.selected_clients)
 
-            fc3_mean_weight = fc3_mean_weight/len(self.selected_clients)
-            fc3_mean_bias = fc3_mean_bias/len(self.selected_clients)
+            fc3_mean_weight = fc3_mean_weight / len(self.selected_clients)
+            fc3_mean_bias = fc3_mean_bias / len(self.selected_clients)
 
         return fc1_mean_weight, fc1_mean_bias, fc2_mean_weight, fc2_mean_bias, fc3_mean_weight, fc3_mean_bias
 
@@ -363,14 +372,14 @@ class Server:
                 fc1_mean_weight += c.model.fc1.weight.data.clone()
                 fc1_mean_bias += c.model.fc1.bias.data.clone()
 
-            cnn1_mean_weight = cnn1_mean_weight/len(self.selected_clients)
-            cnn1_mean_bias = cnn1_mean_bias/len(self.selected_clients)
+            cnn1_mean_weight = cnn1_mean_weight / len(self.selected_clients)
+            cnn1_mean_bias = cnn1_mean_bias / len(self.selected_clients)
 
-            cnn2_mean_weight = cnn2_mean_weight/len(self.selected_clients)
-            cnn2_mean_bias = cnn2_mean_bias/len(self.selected_clients)
+            cnn2_mean_weight = cnn2_mean_weight / len(self.selected_clients)
+            cnn2_mean_bias = cnn2_mean_bias / len(self.selected_clients)
 
-            fc1_mean_weight = fc1_mean_weight/len(self.selected_clients)
-            fc1_mean_bias = fc1_mean_bias/len(self.selected_clients)
+            fc1_mean_weight = fc1_mean_weight / len(self.selected_clients)
+            fc1_mean_bias = fc1_mean_bias / len(self.selected_clients)
 
         return cnn1_mean_weight, cnn1_mean_bias, cnn2_mean_weight, cnn2_mean_bias, fc1_mean_weight, fc1_mean_bias
 
@@ -406,7 +415,7 @@ class Server:
         self.main_model.eval()
         with torch.no_grad():
             if self.network_type == 'CNN':
-                data = data.reshape(-1,1,28,28)
+                data = data.reshape(-1, 1, 28, 28)
             return self.main_model(data)
 
     def save_model(self, path):
@@ -425,7 +434,7 @@ class Client:
         '''
 
     def __init__(self, id, x_train, y_train, x_test, y_test, learning_rate=0.01,
-                 num_of_epochs=10, batch_size=32, momentum=0.9, saved=False, path=None,network_type='NN'):
+                 num_of_epochs=10, batch_size=32, momentum=0.9, saved=False, path=None, network_type='NN'):
 
         logging.debug("Client: __init__()")
         self.id = "client_" + id
@@ -436,7 +445,8 @@ class Client:
         # training and test can be splitted inside the client class
         # now we are passing them while instantiate the class
 
-        logging.debug("Client: x_train : %s = %s | y_train : %s = %s", type(x_train), x_train.shape, type(y_train), y_train.shape)
+        logging.debug("Client: x_train : %s = %s | y_train : %s = %s", type(
+            x_train), x_train.shape, type(y_train), y_train.shape)
 
         x_train, y_train, x_test, y_test = map(
             torch.tensor, (x_train, y_train, x_test, y_test))
@@ -444,16 +454,15 @@ class Client:
         y_test = y_test.type(torch.LongTensor)
 
         if self.network_type == 'CNN':
-            x_train = x_train.reshape(-1, 1,28,28)
-            x_test = x_test.reshape(-1, 1,28,28)
-
+            x_train = x_train.reshape(-1, 1, 28, 28)
+            x_test = x_test.reshape(-1, 1, 28, 28)
 
         self.x_train = x_train
         self.y_train = y_train
         self.x_test = x_test
         self.y_test = y_test
 
-        self.model_name = "model"+self.id
+        self.model_name = "model" + self.id
         if self.network_type == 'NN':
             self.model = Net2nn()
         elif self.network_type == 'CNN':
@@ -462,14 +471,15 @@ class Client:
         logging.debug("Client: %s | %s | %s", self.id, saved, path)
 
         if saved:
+            id_model = int(id) % 10
             self.model.load_state_dict(torch.load(
-                os.path.join(path, "model_{}".format(self.id))))
+                os.path.join(path, "model_client_{}".format(id_model))))
 
-        self.optimizer_name = "optimizer"+str(self.id)
+        self.optimizer_name = "optimizer" + str(self.id)
         self.optimizer_info = torch.optim.SGD(
             self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
 
-        self.criterion_name = "criterion"+str(self.id)
+        self.criterion_name = "criterion" + str(self.id)
         self.criterion_info = nn.CrossEntropyLoss()
 
     def update_model_weights(self, main_model):
@@ -478,7 +488,7 @@ class Client:
         elif self.network_type == 'CNN':
             self.update_model_weights_cnn(main_model)
 
-    def update_model_weights_nn(self,main_model):
+    def update_model_weights_nn(self, main_model):
         with torch.no_grad():
             self.model.fc1.weight.data = main_model.fc1.weight.data.clone()
             self.model.fc2.weight.data = main_model.fc2.weight.data.clone()
@@ -487,7 +497,7 @@ class Client:
             self.model.fc2.bias.data = main_model.fc2.bias.data.clone()
             self.model.fc3.bias.data = main_model.fc3.bias.data.clone()
 
-    def update_model_weights_cnn(self,main_model):
+    def update_model_weights_cnn(self, main_model):
         with torch.no_grad():
             self.model.cnn1.weight.data = main_model.cnn1.weight.data.clone()
             self.model.cnn2.weight.data = main_model.cnn2.weight.data.clone()
@@ -498,7 +508,8 @@ class Client:
 
     def call_training(self, n_of_epoch):
         train_ds = TensorDataset(self.x_train, self.y_train)
-        train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
+        train_dl = DataLoader(
+            train_ds, batch_size=self.batch_size, shuffle=True)
 
         test_ds = TensorDataset(self.x_test, self.y_test)
         test_dl = DataLoader(test_ds, batch_size=self.batch_size * 2)
@@ -508,7 +519,8 @@ class Client:
             train_loss, train_accuracy = self.train(train_dl)
             test_loss, test_accuracy = self.validation(test_dl)
 
-            logging.debug("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch+1) + " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
+            logging.debug("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch + 1) +
+                          " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
 
     def train(self, train_dl):
         logging.debug("INSIDE THE TRAINING CLIENT {}".format(self.id))
@@ -528,7 +540,7 @@ class Client:
             prediction = output.argmax(dim=1, keepdim=True)
             correct += prediction.eq(target.view_as(prediction)).sum().item()
 
-        return train_loss / len(train_dl), correct/len(train_dl.dataset)
+        return train_loss / len(train_dl), correct / len(train_dl.dataset)
 
     def validation(self, test_dl):
         self.model.eval()
@@ -553,7 +565,7 @@ class Client:
         with torch.no_grad():
             if self.network_type == 'CNN':
                 logging.debug("Client: predict CNN")
-                data = data.reshape(-1,1,28,28)
+                data = data.reshape(-1, 1, 28, 28)
             return self.model(data)
 
     def save_model(self, path):
@@ -562,9 +574,10 @@ class Client:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(
+        format='[+] %(levelname)s: %(message)s', level=logging.DEBUG)
     parser = argparse.ArgumentParser()
-    parser.add_argument("conf_file",type=str)
+    parser.add_argument("conf_file", type=str)
     args = parser.parse_args()
     logging.debug("Running with configuration file {}".format(args.conf_file))
 
