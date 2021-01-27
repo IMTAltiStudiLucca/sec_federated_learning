@@ -575,7 +575,7 @@ class Client:
 
 if __name__ == '__main__':
     logging.basicConfig(
-        format='[+] %(levelname)s: %(message)s', level=logging.DEBUG)
+        format='[+] %(levelname)s: %(message)s', level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("conf_file", type=str)
     args = parser.parse_args()
