@@ -17,3 +17,12 @@ docker run -it -v $(pwd):/home/fedexp gabrielec/fedexp /bin/bash
 ```
  docker run -it -v "$(pwd):/home/fedexp" gabrielec/fedexp /bin/bash
 ```
+
+## Test with docker
+
+*From within the test output folder*
+
+```
+docker run -v $(pwd):/home/fedexp/src/tests gabrielec/fedexp-test-label
+docker run -v $(pwd):/home/fedexp/src/tests gabrielec/fedexp-test-source
+```

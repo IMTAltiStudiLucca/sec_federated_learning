@@ -11,11 +11,11 @@ RUN pip install matplotlib
 RUN pip install keras
 RUN pip install torch
 RUN pip install torchvision
-RUN apt-get update && apt-get install -y wget unzip
+RUN apt-get update && apt-get install -y wget unzip rsync
 ENTRYPOINT cd /home && \
  wget https://github.com/fpinell/sec_federated_learning/archive/main.zip && \
  unzip main.zip && \
- mv sec_federated_learning-main/* fedexp && \
+ rsync -a sec_federated_learning-main/ fedexp/ && \
  rm main.zip && \
  rm -r sec_federated_learning-main && \
  cd /home/fedexp/src && \
