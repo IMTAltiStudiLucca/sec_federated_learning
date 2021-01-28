@@ -48,8 +48,8 @@ ORIGINAL = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
 
-NTRAIN = 1  # rounds of training
-NTRANS = 10  # rounds for transmission tests
+#NTRAIN = 1  # rounds of training
+#NTRANS = 10  # rounds for transmission tests
 DELTA = 0.1
 ALPHA = 0.42
 BATCH_SIZE = 32
@@ -402,8 +402,9 @@ class Setup_env:
 
         self.save_tests = self.settings['setup']['save_tests']
         self.saving_tests_dir = self.settings['setup']['tests_dir']
-        self.prob_selection = self.settings['setup']['prob_sel']
+        self.prob_selection = self.settings['setup']['random_clients']
         self.n_bits = self.settings['setup']['n_bits']
+        self.num_of_epochs = self.settings['setup']['num_of_epochs']
         self.n_Rcal = self.settings['setup']['n_Rcal']
         self.saved = False
 
@@ -452,6 +453,9 @@ def main():
     # 2.0 create Setup
     setup_env = Setup_env(args.conf_file)
     id_tests = setup_env.id_tests()
+    NTRANS = setup_env.n_bits
+    NTRAIN = setup_env.num_of_epochs
+
 
     if setup_env.save_tests:
         setup_env.save()
