@@ -119,8 +119,8 @@ def log_event(x, e):
 
 
 hl, = plt.plot([], [])
-plt.ylim([20, 55])
-plt.xlim([0, NTRAIN + (NTRANS * 12)])
+#plt.ylim([20, 55])
+#plt.xlim([0, NTRAIN + (NTRANS * 12)])
 plt.xlabel('Time (FL rounds)', fontdict=font)
 plt.ylabel('Prediction', fontdict=font)
 plt.title('Covert Channel Comm. via Score Attack to a FL model', fontdict=font)
@@ -386,6 +386,7 @@ class Setup_env:
 
         self.save_tests = self.settings['setup']['save_tests']
         self.saving_tests_dir = self.settings['setup']['tests_dir']
+        self.batch_size = self.settings['setup']['batch_size']
         self.prob_selection = self.settings['setup']['random_clients']
         self.n_bits = self.settings['setup']['n_bits']
         self.num_of_epochs = self.settings['setup']['num_of_epochs']
@@ -440,6 +441,8 @@ def main():
     id_tests = setup_env.id_tests()
     NTRANS = setup_env.n_bits
     NTRAIN = setup_env.num_of_epochs
+    global BATCH_SIZE
+    BATCH_SIZE = setup_env.batch_size
 
     if setup_env.save_tests:
         setup_env.save()
