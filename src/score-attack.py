@@ -173,6 +173,7 @@ def slope(y):
 
 
 signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 
 class ReceiverState(enum.Enum):
