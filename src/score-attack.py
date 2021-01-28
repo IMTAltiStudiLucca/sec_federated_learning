@@ -74,8 +74,8 @@ BASELINE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 LABEL = 0
 
-NTRAIN = 1  # rounds of training
-NTRANS = 10  # rounds for transmission tests
+#NTRAIN = 1  # rounds of trainingù
+#NTRANS = 10  # rounds for transmission tests
 DELTA = 0.0
 BATCH_SIZE = 32
 NSELECTION = 3
@@ -386,9 +386,11 @@ class Setup_env:
 
         self.save_tests = self.settings['setup']['save_tests']
         self.saving_tests_dir = self.settings['setup']['tests_dir']
-        self.prob_selection = self.settings['setup']['prob_sel']
+        self.prob_selection = self.settings['setup']['random_clients']
         self.n_bits = self.settings['setup']['n_bits']
+        self.num_of_epochs = self.settings['setup']['num_of_epochs']
         self.n_Rcal = self.settings['setup']['n_Rcal']
+
         self.saved = False
 
         if "saved" not in self.settings.keys():
@@ -436,7 +438,8 @@ def main():
     # 2.0 Setup environment for saving tests
     setup_env = Setup_env(args.conf_file)
     id_tests = setup_env.id_tests()
-    # logging.info("ID Test name: %s", id_tests)
+    NTRANS = setup_env.n_bits
+    NTRAIN = setup_env.num_of_epochs
 
     if setup_env.save_tests:
         setup_env.save()

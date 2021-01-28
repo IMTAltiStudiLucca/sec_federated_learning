@@ -2,7 +2,7 @@ setup:
   data_path: ""
   n_clients: 10
   learning_rate: 0.01
-  num_of_epochs: 10
+  num_of_epochs: 1
   batch_size: 32
   momentum: 0.9
   random_clients: 0.5
@@ -14,6 +14,5 @@ setup:
   network_type: 'NN'
   save_tests: 1
   tests_dir: './tests'
-  prob_sel: 0.5
   n_bits: 1000
   n_Rcal: 1
