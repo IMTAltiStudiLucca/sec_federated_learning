@@ -405,7 +405,7 @@ class Setup_env:
         self.prob_selection = self.settings['setup']['random_clients']
         self.batch_size = self.settings['setup']['batch_size']
         self.n_bits = self.settings['setup']['n_bits']
-        self.num_of_epochs = self.settings['setup']['num_of_epochs']
+        self.n_train_offset = self.settings['setup']['n_train_offset']
         self.n_Rcal = self.settings['setup']['n_Rcal']
         self.saved = False
 
@@ -455,7 +455,7 @@ def main():
     setup_env = Setup_env(args.conf_file)
     id_tests = setup_env.id_tests()
     NTRANS = setup_env.n_bits
-    NTRAIN = setup_env.num_of_epochs
+    NTRAIN = setup_env.n_train_offset
     global BATCH_SIZE
     BATCH_SIZE = setup_env.batch_size
 
