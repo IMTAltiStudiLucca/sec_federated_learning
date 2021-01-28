@@ -15,5 +15,5 @@ setup:
   save_tests: 1
   tests_dir: './tests'
   prob_sel: 0.5
-  n_bits: 10
+  n_bits: 1000
   n_Rcal: 1

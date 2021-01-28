@@ -24,5 +24,5 @@ docker run -it -v $(pwd):/home/fedexp gabrielec/fedexp /bin/bash
 
 ```
 docker run -v $(pwd):/home/fedexp/src/tests gabrielec/fedexp-test-label
-docker run -v $(pwd):/home/fedexp/src/tests gabrielec/fedexp-test-source
+docker run -v $(pwd):/home/fedexp/src/tests gabrielec/fedexp-test-score
 ```
