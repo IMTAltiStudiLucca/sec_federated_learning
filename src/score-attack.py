@@ -184,7 +184,7 @@ class ReceiverState(enum.Enum):
 
 class Sender(Client):
 
-    def __init__(self, x_sample, x_biased, y_label, frame, replay):
+    def __init__(self, x_sample, x_biased, y_label, frame, replay, network_type):
         self.bit = None
         self.sent = False
         self.frame_count = -1
@@ -194,7 +194,7 @@ class Sender(Client):
         y_train = numpy.array([y_label, y_label])
         x_train = x_train.astype('float32')
         x_train /= 255
-        super().__init__("Sender", x_train, y_train, x_train, y_train)
+        super().__init__("Sender", x_train, y_train, x_train, y_train, network_type=network_type)
 
     # Covert channel send
     def call_training(self, n_of_epoch):
@@ -247,7 +247,7 @@ class Sender(Client):
 
 class Receiver(Client):
 
-    def __init__(self, x_sample, x_biased, y_label):
+    def __init__(self, x_sample, x_biased, y_label, network_type):
         self.bit = None
         self.selection_count = 0
         self.frame = 0
@@ -262,7 +262,7 @@ class Receiver(Client):
         y_train = numpy.array([y_label, y_label])
         x_train = x_train.astype('float32')
         x_train /= 255
-        super().__init__("Receiver", x_train, y_train, x_train, y_train)
+        super().__init__("Receiver", x_train, y_train, x_train, y_train,network_type=network_type)
 
     def call_training(self, n_of_epoch):
         logging.debug("Receiver: call_training()")
@@ -329,7 +329,7 @@ class Receiver(Client):
 
 class Observer(Client):
 
-    def __init__(self, x_sample, x_biased, y_label):
+    def __init__(self, x_sample, x_biased, y_label, network_type):
         self.frame_count = 0
         self.frame = 0
         self.x = 0
@@ -337,7 +337,7 @@ class Observer(Client):
         y_train = numpy.array([y_label, y_label])
         x_train = x_train.astype('float32')
         x_train /= 255
-        super().__init__("Observer", x_train, y_train, x_train, y_train)
+        super().__init__("Observer", x_train, y_train, x_train, y_train, network_type=network_type)
 
     # Covert channel send
     def call_training(self, n_of_epoch):
@@ -392,6 +392,7 @@ class Setup_env:
         self.n_bits = self.settings['setup']['n_bits']
         self.n_train_offset = self.settings['setup']['n_train_offset']
         self.n_Rcal = self.settings['setup']['n_Rcal']
+        self.network_type = self.settings['setup']['network_type']
 
         self.saved = False
 
@@ -452,7 +453,7 @@ def main():
     setup = Setup(args.conf_file)
 
     # 2.2. add observer
-    observer = Observer(ORIGINAL, BASELINE, LABEL)
+    observer = Observer(ORIGINAL, BASELINE, LABEL, network_type=setup.network_type)
     setup.add_clients(observer)
 
     # 3. run N rounds OR load pre-trained models
@@ -460,7 +461,7 @@ def main():
     # setup.load("...")
 
     # 4. create Receiver
-    receiver = Receiver(ORIGINAL, BASELINE, LABEL)
+    receiver = Receiver(ORIGINAL, BASELINE, LABEL, network_type=setup.network_type)
     setup.add_clients(receiver)
     log_event(observer.x, 'Receiver added')
 
@@ -474,7 +475,7 @@ def main():
     logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
 
     # 6. create sender
-    sender = Sender(ORIGINAL, BASELINE, LABEL, receiver.frame, receiver.replay_model)
+    sender = Sender(ORIGINAL, BASELINE, LABEL, receiver.frame, receiver.replay_model, network_type=setup.network_type)
     setup.add_clients(sender)
     log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)

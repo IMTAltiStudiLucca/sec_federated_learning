@@ -111,7 +111,7 @@ class CNN(nn.Module):
         return out
 
     def clone(self):
-        model_clone = Net2nn()
+        model_clone = CNN()
         model_clone.cnn1.weight.data = self.cnn1.weight.data.clone()
         model_clone.cnn2.weight.data = self.cnn2.weight.data.clone()
         model_clone.fc1.weight.data = self.fc1.weight.data.clone()
