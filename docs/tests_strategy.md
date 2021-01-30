@@ -1,6 +1,6 @@
 # Tests Strategy
 
-*Jan 19, 2021*
+*Jan 30, 2021*
 
 ### Assumptions:
 
@@ -23,8 +23,10 @@
     - p = 0.1, 0.2, 0.3, 0.4, 0.5
   - **K**  = number of bit transmitted
     - K = 10 (for figures), 1000, 10000
-  - **Rc** = number of recalibration slot
-    - Rc = 1, K/100, K/1000 
+  - <s>**Rc** = number of recalibration slot
+    - Rc = 1, K/100, K/1000 </s>
+  - **TN** = type of network
+    - TN = NN or CNN
 
 ### Outputs:
   we save these output at the end of each test.
@@ -37,9 +39,9 @@
 - **Score-attack**:
 
   - Figure 1: Score vs Time (epochs)
-  - Figure 2: BER vs Channel capacity by varying Rc
+  - Figure 2: BER vs Channel capacity by varying <s>Rc</s> TN
   
 - **Label-attack**:
 
   - Figure 1: Label vs Time (epochs)
-  - Figure 2: BER vs Channel capacity by varying Rc
+  - Figure 2: BER vs Channel capacity by varying <s>Rc</s> TN
