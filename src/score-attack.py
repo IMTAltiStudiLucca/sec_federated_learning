@@ -151,8 +151,6 @@ def save_stats():
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
     logging.info("save path: %s", save_path + "/output")
-    plt.savefig(save_path + '/output.png', dpi=300)
-    plt.savefig(save_path +'/output.svg', dpi=300)
     sdf = pandas.DataFrame(score_dict)
     sdf.to_csv(save_path + '/' + SCORE_LOG)
     edf = pandas.DataFrame(event_dict)
