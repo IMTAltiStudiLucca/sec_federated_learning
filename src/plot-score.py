@@ -27,7 +27,7 @@ hl, = plt.plot([], [])
 
 plt.xlabel('Time (FL rounds)', fontdict=font, labelpad=5)
 plt.ylabel('Prediction', fontdict=font, labelpad=5)
-plt.title('Covert Channel Communication \n via Label Attack to a FL model', fontdict=font)
+plt.title('Covert Channel Communication \n via Score Attack to a FL model', fontdict=font)
 plt.plot(x_values, y_values, linestyle='--', marker = 'x', color='black', label='Text')
 
 # Adjust axes
