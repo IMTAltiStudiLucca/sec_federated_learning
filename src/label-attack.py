@@ -128,8 +128,6 @@ def save_stats():
     x_max = max(x_values) + DELTA_PLT_X
     plt.xlim(x_min, x_max)
     logging.info("save path: %s", save_path + "/output")
-    plt.savefig(save_path + '/output.png', dpi=300)
-    plt.savefig(save_path +'/output.svg', dpi=300)
     sdf = pandas.DataFrame(score_dict)
     sdf.to_csv(save_path + '/' + SCORE_LOG)
     edf = pandas.DataFrame(event_dict)
@@ -441,7 +439,7 @@ class Setup_env:
 
     def id_tests(self):
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
-        id_tests = "Score-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(
+        id_tests = "Label-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(
             self.n_Rcal) + "_" + timestamp
         return id_tests
 
