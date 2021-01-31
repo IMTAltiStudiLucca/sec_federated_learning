@@ -426,7 +426,7 @@ class Setup_env:
     def id_tests(self):
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         id_tests = "Score-attack_" + "p_" + str(self.prob_selection) + "_K_" + str(self.n_bits) + "_Rcal_" + str(
-            self.n_Rcal) + "_" + timestamp
+            self.n_Rcal) + "_Net_"+str(self.network_type)+"_" + timestamp
         return id_tests
 
 
