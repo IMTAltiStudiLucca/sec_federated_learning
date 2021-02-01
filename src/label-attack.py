@@ -80,7 +80,7 @@ error_rate = 0
 save_path = ""
 
 
-def increase_error_rate(error_rate):
+def increase_error_rate():
     error_rate += 1
 
 
@@ -406,7 +406,11 @@ class Setup_env:
         self.n_train_offset = self.settings['setup']['n_train_offset']
         self.n_Rcal = self.settings['setup']['n_Rcal']
         self.network_type = self.settings['setup']['network_type']
+        self.docker = True
         self.saved = False
+
+        if "docker" in self.settings['setup'].keys():
+            self.docker = self.settings['setup']['docker']
 
         if "saved" not in self.settings.keys():
             self.start_time = datetime.now()
@@ -424,7 +428,11 @@ class Setup_env:
             return settings
 
     def save(self):
-        id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True).decode("utf-8").rstrip()
+        id_folder = None
+        if self.docker:
+            id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True).decode("utf-8").rstrip()
+        else:
+            id_folder = str(os.getpid())
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
         global save_path
@@ -503,9 +511,14 @@ def main():
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
         successful_transmissions += check_transmission_success(sender, receiver)
-        log_event(observer.x, "Transmissions: " + str(successful_transmissions))
+        log_event(observer.x, "Transmissions: " + str(r))
+        log_event(observer.x, "Successful Transmissions: " + str(successful_transmissions))
+        log_event(observer.x, "Errors:" + str(error_rate))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
+
+    log_event(observer.x,"FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
+    log_event(observer.x, "FINAL ERROR: " + str(error_rate))
 
     save_stats()
 
@@ -540,12 +553,12 @@ def check_transmission_success(s, r):
             result = 1
         else:
             logging.info("Attacker: transmission FAIL")
-            increase_error_rate(error_rate)
+            increase_error_rate()
         s.bit = None
         r.bit = None
     return result
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='[+] %(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
     main()
