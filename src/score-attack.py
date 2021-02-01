@@ -100,7 +100,7 @@ event_dict = {
     'E': []
 }
 
-error_rate = 0
+# error_rate = 0
 
 save_path = ""
 
@@ -489,10 +489,15 @@ def main():
 
     # 8. start transmitting
     successful_transmissions = 0
+    error_rate = 0 
     for r in range(NTRANS):
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
-        successful_transmissions += check_transmission_success(sender, receiver)
+        check = check_transmission_success(sender, receiver)
+        if  check:
+            successful_transmissions += 1
+        else:
+            error_rate +=1 
         log_event(observer.x, "Transmissions: " + str(r))
         log_event(observer.x, "Successful Transmissions: " + str(successful_transmissions))
         log_event(observer.x, "Errors:" + str(error_rate))
@@ -531,7 +536,6 @@ def check_transmission_success(s, r):
             result = 1
         else:
             logging.info("Attacker: transmission FAIL")
-            increase_error_rate()
         s.bit = None
         r.bit = None
     return result
