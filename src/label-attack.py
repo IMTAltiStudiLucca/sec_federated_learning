@@ -406,7 +406,11 @@ class Setup_env:
         self.n_train_offset = self.settings['setup']['n_train_offset']
         self.n_Rcal = self.settings['setup']['n_Rcal']
         self.network_type = self.settings['setup']['network_type']
+        self.docker = True
         self.saved = False
+
+        if "docker" in self.settings['setup'].keys():
+            self.docker = self.settings['setup']['docker']
 
         if "saved" not in self.settings.keys():
             self.start_time = datetime.now()
@@ -424,7 +428,11 @@ class Setup_env:
             return settings
 
     def save(self):
-        id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True).decode("utf-8").rstrip()
+        id_folder = None
+        if self.docker:
+            id_folder = subprocess.check_output('cat /proc/self/cgroup | grep "docker" | sed  s/\\\\//\\\\n/g | tail -1', shell=True).decode("utf-8").rstrip()
+        else:
+            id_folder = str(os.getpid())
         timestamp = self.start_time.strftime("%Y%m%d%H%M%S")
         self.path = os.path.join(self.saving_tests_dir, id_folder)
         global save_path
