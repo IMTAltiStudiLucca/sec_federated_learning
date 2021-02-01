@@ -104,7 +104,7 @@ error_rate = 0
 
 save_path = ""
 
-def increase_error_rate(error_rate):
+def increase_error_rate():
     error_rate += 1
 
 
@@ -486,11 +486,14 @@ def main():
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
         successful_transmissions += check_transmission_success(sender, receiver)
-        log_event(observer.x, "Transmissions: " + str(successful_transmissions))
+        log_event(observer.x, "Transmissions: " + str(r))
+        log_event(observer.x, "Successful Transmissions: " + str(successful_transmissions))
+        log_event(observer.x, "Errors:" + str(error_rate))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
 
-    log_event(observer.x, "ERROR RATE: " + str(error_rate))
+    log_event(observer.x,"FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
+    log_event(observer.x, "FINAL ERROR: " + str(error_rate))
 
     save_stats()
 
@@ -521,12 +524,12 @@ def check_transmission_success(s, r):
             result = 1
         else:
             logging.info("Attacker: transmission FAIL")
-            increase_error_rate(error_rate)
+            increase_error_rate()
         s.bit = None
         r.bit = None
     return result
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='[+] %(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='[+] %(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
     main()
