@@ -6,7 +6,7 @@ then
   exit
 fi
 
-for i in `seq 0 $((i - 1))`; do
+for i in `seq 0 $(($1 - 1))`; do
   echo Launching container N. $i
   docker run --cpuset-cpus $((i)) -v $(pwd):/home/fedexp/src/tests gabrielec/fedexp-test-score >> "score-${i}.out" 2>&1 &
 done
