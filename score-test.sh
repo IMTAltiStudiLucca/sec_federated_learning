@@ -7,7 +7,7 @@ then
 fi
 
 for i in `seq 0 $(($1 - 1))`; do
-  index=$2 + $i	
+  index=$(($2 + i))	
   setup="./simulations/simulazione_${index}.yaml"
   mkdir -p "./${i}"
   echo Launching container N. $i with setup $setup
