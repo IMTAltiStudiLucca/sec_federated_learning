@@ -20,7 +20,7 @@ docker run -it -v $(pwd):/home/fedexp gabrielec/fedexp /bin/bash
 
 *If you want so save the simulation output to file*
 ```
- docker run -it -v "$(pwd):/home/fedexp" gabrielec/fedexp /bin/bash >> ./tests/simulation.out 2>&1 &
+ docker run -it -v "$(pwd):/home/fedexp/src/tests" gabrielec/fedexp /bin/bash >> ./tests/simulation.out 2>&1 &
 ```
 
 
