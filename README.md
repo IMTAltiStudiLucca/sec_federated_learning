@@ -13,14 +13,14 @@ docker run -it -v $(pwd):/home/fedexp gabrielec/fedexp /bin/bash
 ```
 
 ## Run with docker (OSX)
+*With the following command you mount the folder $(pwd) into /home/fedexp/src/tests*
+```
+ docker run -it -v "$(pwd):/home/fedexp/src/tests" gabrielec/fedexp /bin/bash
+```
 
+*Then, when you are inside your docker container, you can run attacks with a command as follows*
 ```
- docker run -it -v "$(pwd):/home/fedexp" gabrielec/fedexp /bin/bash
-```
-
-*If you want so save the simulation output to file*
-```
- docker run -it -v "$(pwd):/home/fedexp/src/tests" gabrielec/fedexp /bin/bash >> ./tests/simulation.out 2>&1 &
+ python score-attack.py ./simulations/siumulazione_XX.yaml >> ./tests/simulation_XX.out 2>&1 &
 ```
 
 
