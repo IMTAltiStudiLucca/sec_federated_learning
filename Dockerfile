@@ -14,9 +14,9 @@ RUN pip install torchvision
 RUN apt-get update && apt-get install -y wget unzip rsync
 ENTRYPOINT cd /home && \
  wget https://github.com/fpinell/sec_federated_learning/archive/test.zip && \
- unzip sec_federated_learning-test.zip && \
+ unzip test.zip && \
  rsync -a sec_federated_learning-test/ fedexp/ && \
- rm sec_federated_learning-test.zip && \
- rm -r sec_federated_learning-zip && \
+ rm test.zip && \
+ rm -r sec_federated_learning-test && \
  cd /home/fedexp/src && \
  python $script $setup
