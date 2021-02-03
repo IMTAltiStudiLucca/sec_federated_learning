@@ -1,5 +1,7 @@
 FROM tensorflow/tensorflow
 
+ENV script=$attack_script
+ENV setup=$setup_script
 RUN mkdir /home/fedexp
 RUN python -m pip install --upgrade pip
 RUN pip install pandas
@@ -11,10 +13,10 @@ RUN pip install torch
 RUN pip install torchvision
 RUN apt-get update && apt-get install -y wget unzip rsync
 ENTRYPOINT cd /home && \
- wget https://github.com/fpinell/sec_federated_learning/archive/main.zip && \
- unzip main.zip && \
- rsync -a sec_federated_learning-main/ fedexp/ && \
- rm main.zip && \
- rm -r sec_federated_learning-main && \
+ wget https://github.com/fpinell/sec_federated_learning/archive/test.zip && \
+ unzip test.zip && \
+ rsync -a sec_federated_learning-test/ fedexp/ && \
+ rm test.zip && \
+ rm -r sec_federated_learning-test && \
  cd /home/fedexp/src && \
- /bin/bash
+ python $script $setup
