@@ -3,7 +3,6 @@ saved:
 setup:
   batch_size: 32
   data_path: ''
-  docker: 0
   federated_runs: 1
   learning_rate: 0.01
   momentum: 0.9
