@@ -153,7 +153,7 @@ def save_stats():
     logging.info("save path: %s", save_path + "/output")
     sdf = pandas.DataFrame(score_dict)
     sdf.to_csv(save_path + '/' + SCORE_LOG)
-    edf = pandas0, 0.DataFrame(event_dict)
+    edf = pandas.DataFrame(event_dict)
     edf.to_csv(save_path + '/' +  EVENT_LOG)
 
 
