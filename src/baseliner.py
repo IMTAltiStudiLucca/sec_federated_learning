@@ -82,7 +82,7 @@ def baseline_change_brightness(image, byte):
 ## Cancel the picture from left
 def cancelFromLeft(image, alpha):
     assert(0 <= alpha <= 1)
-    new_image = squarize(image.copy())
+    new_image = squarize(image)
     tbr = len(new_image) * len(new_image[0]) * alpha
     for j in range(len(new_image[0])):
         for i in range(len(new_image)):
@@ -96,7 +96,7 @@ def cancelFromLeft(image, alpha):
 ## Cancel the picture from top
 def cancelFromTop(image, alpha):
     assert(0 <= alpha <= 1)
-    new_image = squarize(image.copy())
+    new_image = squarize(image)
     tbr = len(new_image) * len(new_image[0]) * alpha
     for i in range(len(new_image)):
         for j in range(len(new_image[i])):
@@ -105,6 +105,35 @@ def cancelFromTop(image, alpha):
                 new_image[i][j] = 0
 
     return linearize(new_image)
+
+## mix two pictures horizontally
+def hmix(left_i, right_i, alpha):
+    assert(0 <= alpha <= 1)
+    right_sq = squarize(right_i)
+    left_sq = squarize(left_i)
+    tbc = len(right_sq) * len(right_sq[0]) * alpha
+    for j in range(len(right_sq[0])):
+        for i in range(len(right_sq)):
+            if tbc > 0:
+                tbc -= 1
+                right_sq[i][j] = left_sq[i][j]
+
+    return linearize(right_sq)
+
+
+## mix two pictures vertically
+def vmix(top_i, bot_i, alpha):
+    assert(0 <= alpha <= 1)
+    bot_sq = squarize(bot_i)
+    top_sq = squarize(top_i)
+    tbc = len(bot_sq) * len(bot_sq[0]) * alpha
+    for i in range(len(bot_sq)):
+        for j in range(len(bot_sq[0])):
+            if tbc > 0:
+                tbc -= 1
+                bot_sq[i][j] = top_sq[i][j]
+
+    return linearize(bot_sq)
 
 
 ## shift position
@@ -225,13 +254,15 @@ def extract_images(n, m, l):
 
 if __name__ == "__main__":
     # extract_images(0, 1000, 8)
-    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[404]
+    image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[404]
+    image2 = io.load_idx("../data/train-images-idx3-ubyte.gz")[51]
     # draw_digit(cancelFromLeft(image,0.6), 123)
-    middle = squarize(cancelFromLeft(linearize(image),0.306796875))
-    final = squarize(cancelFromLeft(linearize(image),0.5))
+    hmid = squarize(hmix(linearize(image1), linearize(image2), 0.5))
+    vmid = squarize(vmix(linearize(image1), linearize(image2), 0.5))
 
-    draw_digit(image, 1234)
-    draw_digit(middle, 1235)
-    draw_digit(final, 1236)
+    print_digit(image1)
+    print_digit(image2)
+    print_digit(hmid)
+    print_digit(vmid)
     # print(linearize(image))
     # dotted_zero()

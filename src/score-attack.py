@@ -107,14 +107,17 @@ save_path = ""
 def increase_error_rate():
     error_rate += 1
 
+timer = 0
 
-def log_score(x, y):
-    score_dict['X'].append(x)
+def log_score(y):
+    global timer
+    score_dict['X'].append(timer)
     score_dict['Y'].append(y)
 
 
-def log_event(x, e):
-    event_dict['X'].append(x)
+def log_event(e):
+    global timer
+    event_dict['X'].append(timer)
     event_dict['E'].append(e)
 
 
@@ -126,13 +129,15 @@ plt.ylabel('Prediction', fontdict=font)
 plt.title('Covert Channel Comm. via Score Attack to a FL model', fontdict=font)
 
 
-def update_plot(x, y):
-    hl.set_xdata(numpy.append(hl.get_xdata(), [x]))
+def update_plot(y):
+    global timer
+    hl.set_xdata(numpy.append(hl.get_xdata(), [timer]))
     hl.set_ydata(numpy.append(hl.get_ydata(), [y]))
 
 
-def add_vline(xv):
-    plt.axvline(x=xv)
+def add_vline():
+    global timer
+    plt.axvline(x=timer)
 
 
 def signal_handler(sig, frame):
@@ -211,6 +216,7 @@ class Sender(Client):
             logging.info("Sender: frame starts at %s", pred)
             self.bit = random.randint(0, 1)
             logging.info("Sender: SENDING %s", self.bit)
+            log_event("SENT %s", self.bit)
 
         self.frame_count = (self.frame_count + 1) % self.frame
 
@@ -312,12 +318,15 @@ class Receiver(Client):
             else:
                 self.bit = 0
             logging.info("Receiver: RECEIVED: %s", self.bit)
-            self.top = max(self.frame_start, self.frame_end)
-            self.bottom = min(self.frame_start, self.frame_end)
+            log_event("RECEIVED %s", self.bit)
             self.transmission_threshold = (self.top + self.bottom) / 2
             logging.info("Receiver: next transmission threshold: (%s + %s)/2 = %s", self.top, self.bottom, self.transmission_threshold)
+            log_event("THRESHOLD = (%s + %s)/2 = %s", self.top, self.bottom, self.transmission_threshold)
+            self.top = self.transmission_threshold
+            self.bottom = self.transmission_threshold
         else:
-            pass
+            self.top = max(self.top, pred)
+            self.bottom = min(self.bottom, pred)
 
         self.frame_count = (self.frame_count + 1) % self.frame
 
@@ -340,7 +349,6 @@ class Observer(Client):
     def __init__(self, x_sample, x_biased, y_label, network_type):
         self.frame_count = 0
         self.frame = 0
-        self.x = 0
         x_train = numpy.array([x_sample, x_biased])
         y_train = numpy.array([y_label, y_label])
         x_train = x_train.astype('float32')
@@ -361,16 +369,16 @@ class Observer(Client):
 
         logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
 
-        update_plot(self.x, pred)
-        log_score(self.x, pred)
+        update_plot(pred)
+        log_score(pred)
 
         if self.frame > 0:
             if self.frame_count == 0:
-                add_vline(self.x)
-                log_event(self.x, 'Frame start')
+                add_vline()
+                log_event('Frame start')
             self.frame_count = (self.frame_count + 1) % self.frame
-
-        self.x += 1
+        global timer
+        timer += 1
 
     def bias_prediction(self):
         x_pred = self.x_train[[1]]
@@ -478,7 +486,7 @@ def main():
     # 4. create Receiver
     receiver = Receiver(ORIGINAL, BASELINE, LABEL, network_type=setup.network_type)
     setup.add_clients(receiver)
-    log_event(observer.x, 'Receiver added')
+    log_event('Receiver added')
 
     # 5. compute channel baseline
     # baseline = receiver.compute_baseline()
@@ -492,7 +500,7 @@ def main():
     # 6. create sender
     sender = Sender(ORIGINAL, BASELINE, LABEL, receiver.frame, receiver.replay_model, network_type=setup.network_type)
     setup.add_clients(sender)
-    log_event(observer.x, 'Sender added')
+    log_event('Sender added')
     observer.set_frame(receiver.frame)
 
     # 7. perform channel calibration
@@ -508,14 +516,14 @@ def main():
             successful_transmissions += 1
         else:
             error_rate +=1
-        log_event(observer.x, "Transmissions: " + str(r))
-        log_event(observer.x, "Successful Transmissions: " + str(successful_transmissions))
-        log_event(observer.x, "Errors:" + str(error_rate))
+        log_event("Transmissions: " + str(r))
+        log_event("Successful Transmissions: " + str(successful_transmissions))
+        log_event("Errors:" + str(error_rate))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
 
-    log_event(observer.x,"FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
-    log_event(observer.x, "FINAL ERROR: " + str(error_rate))
+    log_event("FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
+    log_event("FINAL ERROR: " + str(error_rate))
 
     save_stats()
 
