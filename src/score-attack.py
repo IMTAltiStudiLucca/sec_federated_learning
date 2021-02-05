@@ -216,7 +216,7 @@ class Sender(Client):
             logging.info("Sender: frame starts at %s", pred)
             self.bit = random.randint(0, 1)
             logging.info("Sender: SENDING %s", self.bit)
-            log_event("SENT %s", self.bit)
+            log_event("Sent " + str(self.bit))
 
         self.frame_count = (self.frame_count + 1) % self.frame
 
@@ -318,10 +318,10 @@ class Receiver(Client):
             else:
                 self.bit = 0
             logging.info("Receiver: RECEIVED: %s", self.bit)
-            log_event("RECEIVED %s", self.bit)
+            log_event("Received " + str(self.bit))
             self.transmission_threshold = (self.top + self.bottom) / 2
             logging.info("Receiver: next transmission threshold: (%s + %s)/2 = %s", self.top, self.bottom, self.transmission_threshold)
-            log_event("THRESHOLD = (%s + %s)/2 = %s", self.top, self.bottom, self.transmission_threshold)
+            log_event("Next threshold = (" + str(self.top) + " + " + str(self.bottom) + ")/2 = " + str(self.transmission_threshold))
             self.top = self.transmission_threshold
             self.bottom = self.transmission_threshold
         else:
