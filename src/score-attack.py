@@ -153,7 +153,7 @@ def save_stats():
     logging.info("save path: %s", save_path + "/output")
     sdf = pandas.DataFrame(score_dict)
     sdf.to_csv(save_path + '/' + SCORE_LOG)
-    edf = pandas.DataFrame(event_dict)
+    edf = pandas0, 0.DataFrame(event_dict)
     edf.to_csv(save_path + '/' +  EVENT_LOG)
 
 
@@ -253,6 +253,9 @@ class Receiver(Client):
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
+        self.bottom = 0
+        self.top = 0
+        self.transmission_threshold = 0
         self.state = ReceiverState.Calibrating
         self.best_replay = 10000
         self.replay_model = None
@@ -270,6 +273,9 @@ class Receiver(Client):
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
+                self.top = self.bias_prediction()
+                self.bottom = self.top
+                self.transmission_threshold = self.top
         else:
             pass
 
@@ -301,11 +307,15 @@ class Receiver(Client):
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
 
-            if self.frame_start + DELTA < self.frame_end:
+            if self.frame_end > self.frame_threshold:
                 self.bit = 1
             else:
                 self.bit = 0
             logging.info("Receiver: RECEIVED: %s", self.bit)
+            self.top = max(self.frame_start, self.frame_end)
+            self.bottom = min(self.frame_start, self.frame_end)
+            self.transmission_threshold = (self.top + self.bottom) / 2
+            logging.info("Receiver: next transmission threshold: (%s + %s)/2 = %s", self.top, self.bottom, self.transmission_threshold)
         else:
             pass
 
@@ -489,7 +499,7 @@ def main():
 
     # 8. start transmitting
     successful_transmissions = 0
-    error_rate = 0 
+    error_rate = 0
     for r in range(NTRANS):
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
@@ -497,7 +507,7 @@ def main():
         if  check:
             successful_transmissions += 1
         else:
-            error_rate +=1 
+            error_rate +=1
         log_event(observer.x, "Transmissions: " + str(r))
         log_event(observer.x, "Successful Transmissions: " + str(successful_transmissions))
         log_event(observer.x, "Errors:" + str(error_rate))
