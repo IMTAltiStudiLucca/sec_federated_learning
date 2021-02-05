@@ -307,7 +307,7 @@ class Receiver(Client):
             self.frame_end = pred
             logging.info("Receiver: frame ends at = %s", pred)
 
-            if self.frame_end > self.frame_threshold:
+            if self.frame_end > self.transmission_threshold:
                 self.bit = 1
             else:
                 self.bit = 0
