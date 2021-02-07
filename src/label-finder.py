@@ -75,7 +75,7 @@ class Finder(Client):
         imageH = bl.hmix(self.image_i, self.image_j, ALPHA)
         H_label = self.label_predict(create_sample(imageH))
 
-        alpha, y0_label, y1_label = self.hsearch(i_label, T_label, 0, ALPHA)
+        alpha, y0_label, y1_label = self.hsearch(i_label, H_label, 0, ALPHA)
 
         if alpha >= 0:
             logging.info("Finder: found edge sample = hmix(%s, %s, %s) = %s | %s", alpha, this.i, this.j, y0_label, y1_label)
@@ -85,7 +85,7 @@ class Finder(Client):
         imageV = Vmix(sample_i, sample_j, ALPHA)
         V_label = self.label_predict(create_sample(imageV))
 
-        alpha, y0_label, y1_label = self.vsearch(i_label, T_label, 0, ALPHA)
+        alpha, y0_label, y1_label = self.vsearch(i_label, V_label, 0, ALPHA)
 
         if alpha >= 0:
             logging.info("Finder: found edge sample = vmix(%s, %s, %s) = %s | %s", alpha, this.i, this.j, y0_label, y1_label)
