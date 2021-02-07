@@ -315,7 +315,7 @@ class Receiver(Client):
             #logging.info("Receiver: frame ends at = %s", pred)
             logging.info("Receiver: frame average = %s", score_avg)
 
-            if avg > self.transmission_threshold:
+            if score_avg > self.transmission_threshold:
                 self.bit = 1
             else:
                 self.bit = 0
