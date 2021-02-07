@@ -94,7 +94,7 @@ class Finder(Client):
 
         self.i += 1
 
-        if self.i > 400
+        if self.i > 400:
             self.j += 1
             self.i = 1
 
