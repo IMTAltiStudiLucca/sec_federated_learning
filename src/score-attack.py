@@ -278,6 +278,7 @@ class Receiver(Client):
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
+                self.frame_scores = [None] * self.frame
                 self.transmission_threshold = self.bias_prediction()
         else:
             pass
