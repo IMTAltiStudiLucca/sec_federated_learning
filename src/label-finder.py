@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import signal
 import pandas
 import sys
-import baseliner
+import baseliner as bl
 
 from datetime import datetime
 import yaml
@@ -68,11 +68,11 @@ class Finder(Client):
 
     def craft(self):
 
-        self.image_i = get_image(self.i)
-        self.image_j = get_image(self.j)
+        self.image_i = bl.get_image(self.i)
+        self.image_j = bl.get_image(self.j)
         i_label = self.label_predict(create_sample(self.image_i))
 
-        imageH = hmix(self.sample_i, self.sample_j, ALPHA)
+        imageH = bl.hmix(self.sample_i, self.sample_j, ALPHA)
         H_label = self.label_predict(create_sample(imageH))
 
         alpha, y0_label, y1_label = self.hsearch(i_label, T_label, 0, ALPHA)
@@ -105,7 +105,7 @@ class Finder(Client):
         if alpha_max < alpha_min + SEARCH_THREASHOLD:
             return alpha_min, y0_label, y1_label
 
-        imageM = hmix(self.sample_i, self.sample_j, (alpha_min + alpha_max) / 2)
+        imageM = bl.hmix(self.sample_i, self.sample_j, (alpha_min + alpha_max) / 2)
         yM_label = self.label_predict(create_sample(xM_sample))
         if y0_label != yM_label:
             return self.hsearch(y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
@@ -122,7 +122,7 @@ class Finder(Client):
         if alpha_max < alpha_min + SEARCH_THREASHOLD:
             return alpha_min, y0_label, y1_label
 
-        imageM = vmix(self.sample_i, self.sample_j, (alpha_min + alpha_max) / 2)
+        imageM = bl.vmix(self.sample_i, self.sample_j, (alpha_min + alpha_max) / 2)
         yM_label = self.label_predict(create_sample(xM_sample))
         if y0_label != yM_label:
             return self.vsearch(y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
