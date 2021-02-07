@@ -252,6 +252,9 @@ def extract_images(n, m, l):
         if label == l:
             draw_digit(image, i)
 
+def get_image(i):
+    return io.load_idx("../data/train-images-idx3-ubyte.gz")[i]
+
 if __name__ == "__main__":
     # extract_images(0, 1000, 8)
     image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[404]
