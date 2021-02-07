@@ -78,9 +78,9 @@ class Finder(Client):
         alpha, y0_label, y1_label = self.hsearch(i_label, H_label, 0, ALPHA)
 
         if alpha >= 0:
-            logging.info("Finder: found edge sample = hmix(%s, %s, %s) = %s | %s", alpha, this.i, this.j, y0_label, y1_label)
+            logging.info("Finder: found edge sample = hmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
         else:
-            logging.info("Finder: not found for (%s,%s)", this.i, this.j)
+            logging.info("Finder: not found for (%s,%s)", self.i, self.j)
 
         imageV = Vmix(sample_i, sample_j, ALPHA)
         V_label = self.label_predict(create_sample(imageV))
@@ -88,12 +88,12 @@ class Finder(Client):
         alpha, y0_label, y1_label = self.vsearch(i_label, V_label, 0, ALPHA)
 
         if alpha >= 0:
-            logging.info("Finder: found edge sample = vmix(%s, %s, %s) = %s | %s", alpha, this.i, this.j, y0_label, y1_label)
+            logging.info("Finder: found edge sample = vmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
         else:
-            logging.info("Finder: not found for (%s,%s)", this.i, this.j)
+            logging.info("Finder: not found for (%s,%s)", self.i, self.j)
 
-        this.i += 1
-        this.j += 1
+        self.i += 1
+        self.j += 1
 
     def hsearch(self, y0_label, y1_label, alpha_min, alpha_max):
 
