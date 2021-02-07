@@ -72,7 +72,7 @@ class Finder(Client):
         self.image_j = bl.linearize(bl.get_image(self.j))
         i_label = self.label_predict(create_sample(self.image_i))
 
-        imageH = bl.hmix(self.sample_i, self.sample_j, ALPHA)
+        imageH = bl.hmix(self.image_i, self.image_j, ALPHA)
         H_label = self.label_predict(create_sample(imageH))
 
         alpha, y0_label, y1_label = self.hsearch(i_label, T_label, 0, ALPHA)
