@@ -253,7 +253,8 @@ def extract_images(n, m, l):
             draw_digit(image, i)
 
 def get_image(i):
-    return io.load_idx("../data/train-images-idx3-ubyte.gz")[i]
+    image = io.load_idx("../data/train-images-idx3-ubyte.gz")[i]
+    return image
 
 if __name__ == "__main__":
     # extract_images(0, 1000, 8)
