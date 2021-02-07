@@ -68,8 +68,8 @@ class Finder(Client):
 
     def craft(self):
 
-        self.image_i = bl.get_image(self.i)
-        self.image_j = bl.get_image(self.j)
+        self.image_i = bl.linearize(bl.get_image(self.i))
+        self.image_j = bl.linearize(bl.get_image(self.j))
         i_label = self.label_predict(create_sample(self.image_i))
 
         imageH = bl.hmix(self.sample_i, self.sample_j, ALPHA)
