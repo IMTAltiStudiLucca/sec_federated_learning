@@ -311,7 +311,7 @@ class Receiver(Client):
         elif self.frame_count == self.frame - 1:
             self.frame_end = pred
 
-            score_avg = avg(frame_scores)
+            score_avg = sum(self.frame_scores)/self.frame
             #logging.info("Receiver: frame ends at = %s", pred)
             logging.info("Receiver: frame average = %s", score_avg)
 
@@ -343,7 +343,7 @@ class Receiver(Client):
         self.frame += 1
 
         if pred < self.best_replay:
-            logging.info("Receive: saving replay model")
+            logging.info("Receiver: saving replay model")
             self.replay_model = self.model.clone()
             self.best_replay = pred
 
