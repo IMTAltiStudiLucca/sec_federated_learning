@@ -321,10 +321,10 @@ class Receiver(Client):
                 self.bit = 0
             logging.info("Receiver: RECEIVED: %s", self.bit)
             log_event("Received " + str(self.bit))
-            self.transmission_threshold = avg
+            self.transmission_threshold = score_avg
             #logging.info("Receiver: next transmission threshold: %s", self.top, self.bottom, self.transmission_threshold)
             #log_event("Next threshold = (" + str(self.top) + " + " + str(self.bottom) + ")/2 = " + str(self.transmission_threshold))
-            logging.info("Receiver: next transmission threshold: %s", self.top, self.bottom, self.transmission_threshold)
+            logging.info("Receiver: next transmission threshold: %s", self.transmission_threshold)
             log_event("Next threshold = " + str(self.transmission_threshold))
 
             #self.top = self.transmission_threshold
