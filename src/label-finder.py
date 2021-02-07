@@ -109,7 +109,7 @@ class Finder(Client):
             return alpha_min, y0_label, y1_label
 
         imageM = bl.hmix(self.image_i, self.image_j, (alpha_min + alpha_max) / 2)
-        yM_label = self.label_predict(create_sample(xM_sample))
+        yM_label = self.label_predict(create_sample(imageM))
         if y0_label != yM_label:
             return self.hsearch(y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
         else:
@@ -126,7 +126,7 @@ class Finder(Client):
             return alpha_min, y0_label, y1_label
 
         imageM = bl.vmix(self.image_i, self.image_j, (alpha_min + alpha_max) / 2)
-        yM_label = self.label_predict(create_sample(xM_sample))
+        yM_label = self.label_predict(create_sample(imageM))
         if y0_label != yM_label:
             return self.vsearch(y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
         else:
