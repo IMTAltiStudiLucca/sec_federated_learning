@@ -82,7 +82,7 @@ class Finder(Client):
         else:
             logging.info("Finder: not found for (%s,%s)", self.i, self.j)
 
-        imageV = bl.vmix(sample_i, sample_j, ALPHA)
+        imageV = bl.vmix(self.image_i, self.image_j, ALPHA)
         V_label = self.label_predict(create_sample(imageV))
 
         alpha, y0_label, y1_label = self.vsearch(i_label, V_label, 0, ALPHA)
