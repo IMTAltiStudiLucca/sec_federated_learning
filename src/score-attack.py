@@ -302,7 +302,7 @@ class Receiver(Client):
     def read_from_model(self):
 
         pred = self.bias_prediction()
-        self.frame_scores[frame_count] = pred
+        self.frame_scores[self.frame_count] = pred
 
         if self.frame_count == 0:
             self.frame_start = pred
