@@ -39,7 +39,7 @@ def create_sample(image):
 
 class Finder(Client):
 
-    def __init__(self):
+    def __init__(self, network_type):
         self.i = 0
         self.j = 0
         self.image_i = None
