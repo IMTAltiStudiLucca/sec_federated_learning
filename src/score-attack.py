@@ -259,8 +259,7 @@ class Receiver(Client):
         self.frame_count = 0
         self.frame_start = 0
         self.frame_end = 0
-        self.bottom = 0
-        self.top = 0
+        self.frame_scores = []
         self.transmission_threshold = 0
         self.state = ReceiverState.Calibrating
         self.best_replay = 10000
@@ -279,9 +278,7 @@ class Receiver(Client):
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
                 self.state = ReceiverState.Ready
-                self.top = self.bias_prediction()
-                self.bottom = self.top
-                self.transmission_threshold = self.top
+                self.transmission_threshold = self.bias_prediction()
         else:
             pass
 
@@ -305,28 +302,34 @@ class Receiver(Client):
     def read_from_model(self):
 
         pred = self.bias_prediction()
+        self.frame_scores[frame_count] = pred
 
         if self.frame_count == 0:
             self.frame_start = pred
-            logging.info("Receiver: frame starts at = %s", pred)
+            #logging.info("Receiver: frame starts at = %s", pred)
         elif self.frame_count == self.frame - 1:
             self.frame_end = pred
-            logging.info("Receiver: frame ends at = %s", pred)
 
-            if self.frame_end > self.transmission_threshold:
+            score_avg = avg(frame_scores)
+            #logging.info("Receiver: frame ends at = %s", pred)
+            logging.info("Receiver: frame average = %s", score_avg)
+
+            if avg > self.transmission_threshold:
                 self.bit = 1
             else:
                 self.bit = 0
             logging.info("Receiver: RECEIVED: %s", self.bit)
             log_event("Received " + str(self.bit))
-            self.transmission_threshold = (self.top + self.bottom) / 2
-            logging.info("Receiver: next transmission threshold: (%s + %s)/2 = %s", self.top, self.bottom, self.transmission_threshold)
-            log_event("Next threshold = (" + str(self.top) + " + " + str(self.bottom) + ")/2 = " + str(self.transmission_threshold))
-            self.top = self.transmission_threshold
-            self.bottom = self.transmission_threshold
+            self.transmission_threshold = avg
+            #logging.info("Receiver: next transmission threshold: %s", self.top, self.bottom, self.transmission_threshold)
+            #log_event("Next threshold = (" + str(self.top) + " + " + str(self.bottom) + ")/2 = " + str(self.transmission_threshold))
+            logging.info("Receiver: next transmission threshold: %s", self.top, self.bottom, self.transmission_threshold)
+            log_event("Next threshold = " + str(self.transmission_threshold))
+
+            #self.top = self.transmission_threshold
+            #self.bottom = self.transmission_threshold
         else:
-            self.top = max(self.top, pred)
-            self.bottom = min(self.bottom, pred)
+            pass
 
         self.frame_count = (self.frame_count + 1) % self.frame
 
