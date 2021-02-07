@@ -93,7 +93,10 @@ class Finder(Client):
             logging.info("Finder: not found for (%s,%s)", self.i, self.j)
 
         self.i += 1
-        self.j += 1
+
+        if self.i > 400
+            self.j += 1
+            self.i = 1
 
     def hsearch(self, y0_label, y1_label, alpha_min, alpha_max):
 
