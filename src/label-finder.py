@@ -12,6 +12,7 @@ import signal
 import pandas
 import sys
 import baseliner as bl
+import random
 
 from datetime import datetime
 import yaml
@@ -19,15 +20,7 @@ import os
 import subprocess
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
-
-#NTRAIN = 1  # rounds of training
-#NTRANS = 10  # rounds for transmission tests
-DELTA = 0.1
-ALPHA = 0.5
-BATCH_SIZE = 32
-NSELECTION = 3
-DELTA_PLT_X = 1
-DELTA_PLT_Y = 1
+ROUNDS = 100
 
 
 def create_sample(image):
@@ -40,8 +33,9 @@ def create_sample(image):
 class Finder(Client):
 
     def __init__(self, network_type):
-        self.i = 0
-        self.j = 0
+        random.seed()
+        self.i = random.nextint(0,99)
+        self.j = random.nextint(0,99)
         self.image_i = None
         self.image_j = None
         x_train = numpy.array([])
@@ -57,8 +51,13 @@ class Finder(Client):
         logging.debug("Finder: update_model_weights()")
         super().update_model_weights(main_model)
 
-        while True:
+        logging.info("Finder: starting edge sample search")
+
+        for i in range(ROUNDS**2):
             self.craft()
+
+        logging.info("Finder: edge sample search terminated")
+
 
     def label_predict(self, x_pred):
         prediction = self.predict(x_pred)
@@ -78,9 +77,9 @@ class Finder(Client):
         alpha, y0_label, y1_label = self.hsearch(i_label, H_label, 0, ALPHA)
 
         if alpha > 0:
-            logging.info("Finder: found edge sample = hmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
+            logging.info("Finder: found hmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
         else:
-            logging.info("Finder: not found for (%s,%s)", self.i, self.j)
+            logging.debug("Finder: not found for (%s,%s)", self.i, self.j)
 
         imageV = bl.vmix(self.image_i, self.image_j, ALPHA)
         V_label = self.label_predict(create_sample(imageV))
@@ -88,15 +87,15 @@ class Finder(Client):
         alpha, y0_label, y1_label = self.vsearch(i_label, V_label, 0, ALPHA)
 
         if alpha > 0:
-            logging.info("Finder: found edge sample = vmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
+            logging.info("Finder: found vmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
         else:
-            logging.info("Finder: not found for (%s,%s)", self.i, self.j)
+            logging.debug("Finder: not found for (%s,%s)", self.i, self.j)
 
         self.i += 1
 
-        if self.i > 1000:
-            self.j += 1
-            self.i = 1
+        if self.i > ROUNDS:
+            self.i = 0
+            self.j = (self.j + 1) % ROUNDS
 
     def hsearch(self, y0_label, y1_label, alpha_min, alpha_max):
 
