@@ -21,6 +21,7 @@ import subprocess
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
 ROUNDS = 100
+ALPHA = 0.5
 
 
 def create_sample(image):
