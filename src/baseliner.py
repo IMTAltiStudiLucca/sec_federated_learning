@@ -257,16 +257,16 @@ def get_image(i):
     return image
 
 if __name__ == "__main__":
-    # vmix(0.4775390625, 2, 53) = tensor(4) | tensor(7)
-    image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[2]
-    image2 = io.load_idx("../data/train-images-idx3-ubyte.gz")[53]
+    # vmix(0.2685546875, 7596, 22242) = tensor(4) | tensor(9)
+    image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[7596]
+    image2 = io.load_idx("../data/train-images-idx3-ubyte.gz")[22242]
     # draw_digit(cancelFromLeft(image,0.6), 123)
     # hmid = squarize(hmix(linearize(image1), linearize(image2), 0.4384765625))
-    vmid = squarize(vmix(linearize(image1), linearize(image2), 0.4775390625))
+    vmid = squarize(vmix(linearize(image1), linearize(image2), 0.2685546875))
 
-    print_digit(image1)
-    print_digit(image2)
+    draw_digit(image1,7596)
+    draw_digit(image2,22242)
     # print_digit(hmid)
-    print_digit(vmid)
+    draw_digit(vmid,1337)
     # print(linearize(image))
     # dotted_zero()
