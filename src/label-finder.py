@@ -20,6 +20,7 @@ import os
 import subprocess
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
+MNIST_SIZE = 30000
 ROUNDS = 100
 ALPHA = 0.5
 
@@ -35,8 +36,8 @@ class Finder(Client):
 
     def __init__(self, network_type):
         random.seed()
-        self.i = random.randint(0,99)
-        self.j = random.randint(0,99)
+        self.i = random.randint(0,MNIST_SIZE)
+        self.j = random.randint(0,MNIST_SIZE)
         self.image_i = None
         self.image_j = None
         x_train = numpy.array([])
@@ -52,9 +53,11 @@ class Finder(Client):
         logging.debug("Finder: update_model_weights()")
         super().update_model_weights(main_model)
 
-        logging.info("Finder: starting edge sample search")
+        logging.info("Finder: starting edge sample search at %s, %s", self.i, self.j)
 
-        for i in range(ROUNDS**2):
+        tot = ROUNDS**2
+        for x in range(tot):
+            print("Processing: %s\%", "{:.2%}".format(x/tot), end="", flush=True)
             self.craft()
 
         logging.info("Finder: edge sample search terminated")
@@ -94,9 +97,9 @@ class Finder(Client):
 
         self.i += 1
 
-        if self.i > ROUNDS:
+        if self.i > MNIST_SIZE:
             self.i = 0
-            self.j = (self.j + 1) % ROUNDS
+            self.j = (self.j + 1) % MNIST_SIZE
 
     def hsearch(self, y0_label, y1_label, alpha_min, alpha_max):
 
@@ -220,7 +223,7 @@ def main():
     setup.add_clients(finder)
 
     # 3. run N rounds OR load pre-trained models
-    setup.run(federated_runs=1)
+    # setup.run(federated_runs=1)
     # setup.load("...")
 
     logging.info("TERMINATED")
