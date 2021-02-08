@@ -34,8 +34,8 @@ class Finder(Client):
 
     def __init__(self, network_type):
         random.seed()
-        self.i = random.nextint(0,99)
-        self.j = random.nextint(0,99)
+        self.i = random.randint(0,99)
+        self.j = random.randint(0,99)
         self.image_i = None
         self.image_j = None
         x_train = numpy.array([])
