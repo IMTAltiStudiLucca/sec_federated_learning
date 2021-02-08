@@ -57,7 +57,7 @@ class Finder(Client):
 
         tot = ROUNDS**2
         for x in range(tot):
-            print("Processing: %s\%", "{:.2%}".format(x/tot), end="", flush=True)
+            print("Processing: {:.2%}".format(x/tot), end="\r", flush=True)
             self.craft()
 
         logging.info("Finder: edge sample search terminated")
