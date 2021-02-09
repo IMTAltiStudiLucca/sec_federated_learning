@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import signal
 import pandas
 import sys
-from baseliner import cancelFromLeft
+import baseliner as bl
 import random
 
 from datetime import datetime
