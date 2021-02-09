@@ -12,6 +12,7 @@ import signal
 import pandas
 import sys
 from baseliner import cancelFromLeft
+import random
 
 from datetime import datetime
 import yaml
@@ -20,6 +21,7 @@ import subprocess
 
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
+MNIST_SIZE = 60000
 
 #NTRAIN = 1  # rounds of training
 #NTRANS = 10  # rounds for transmission tests
@@ -49,7 +51,6 @@ event_dict = {
 }
 
 save_path = ""
-
 
 def increase_error_rate(error_rate):
     error_rate += 1
@@ -134,6 +135,12 @@ def create_sample(image):
     # return x_train[[0]]
     return torch.from_numpy(x_train[[0]])
 
+def create_samples(images):
+    l = []
+    for i in range(len(images)):
+        l.append(create_sample(images[i]))
+    return l
+
 
 class ReceiverState(enum.Enum):
     Crafting = 1
@@ -144,16 +151,17 @@ class ReceiverState(enum.Enum):
 
 class Sender(Client):
 
-    def __init__(self, receiverImage, y_train, frame,network_type):
-        self.bit = None
+    def __init__(self, images, labels, n_channels, frame, network_type):
+        self.bit = [None]*n_channels
+        self.n_channels = n_channels
         self.sent = False
         self.frame_count = -1
         self.frame = frame
         self.frame_start = None
-        x_train = numpy.array([receiverImage, receiverImage])
+        x_train = numpy.array(images)
         x_train = x_train.astype('float32')
         x_train /= 255
-        super().__init__("Sender", x_train, y_train, x_train, y_train,network_type=network_type)
+        super().__init__("Sender", x_train, labels, x_train, labels, network_type=network_type)
 
     # Covert channel send
     def call_training(self, n_of_epoch):
@@ -171,7 +179,9 @@ class Sender(Client):
             # x_pred = torch.from_numpy(self.x_train[[0]])
             self.frame_start = self.label_predict(self.x_train[[0]])
             logging.info("Sender: frame starts with %s", self.frame_start)
-            self.bit = random.randint(0, 1)
+            for c in range(self.n_channels):
+                self.bit[c] = random.randint(0, 1)
+
             logging.info("Sender: SENDING %s", self.bit)
             log_event("Sent " + str(self.bit))
 
@@ -186,46 +196,45 @@ class Sender(Client):
     # forces biases to transmit one bit through the model
     def send_to_model(self, n_of_epoch):
 
-        if self.bit == 1:
-            # change prediction
-            logging.info("Sender: injecting bias 1")
+        for c in range(self.n_channels):
+            if self.bit[c] == 1:
+                # change prediction
+                logging.info("Sender: channel %s injecting 1", c)
 
-            if self.frame_start == self.y_train[[0]]:
-                y_train_trans = self.y_train[1:2]
+                if self.frame_start == self.y_train[c][0]:
+                    y_train_trans = self.y_train[c][1]
+                else:
+                    y_train_trans = self.y_train[c][0]
+
+                logging.debug("Sender: index %s", y_train_trans)
+                # bias injection dataset
+                train_ds = TensorDataset(self.x_train[c], y_train_trans)
+                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+
+                # bias testing dataset
+                test_ds = TensorDataset(self.x_train[c], y_train_trans)
+                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+
+                for epoch in range(n_of_epoch):
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
+
             else:
-                y_train_trans = self.y_train[0:1]
-
-            logging.info("Sender: index %s", y_train_trans)
-            # bias injection dataset
-            train_ds = TensorDataset(self.x_train[0:1], y_train_trans)
-            train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
-
-            # bias testing dataset
-            test_ds = TensorDataset(self.x_train[0:1], y_train_trans)
-            test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
-
-            for epoch in range(n_of_epoch):
-                train_loss, train_accuracy = self.train(train_dl)
-                test_loss, test_accuracy = self.validation(test_dl)
-
-        else:
-
-            logging.info("Sender: injecting bias 0")
-            # do nothing, prediction should stay unchanged
-
+                logging.info("Sender: channel %s injecting 0", c)
+                # do nothing, prediction should stay unchanged
 
 class Receiver(Client):
 
     def __init__(self,n_channels,network_type):
-        self.bit = None
+        self.bit = [None]*n_channels
         self.n_channels = n_channels
-        self.images = []
-        self.labels = []
+        self.images = [None]*n_channels
+        self.labels = [None]*n_channels
         self.selection_count = 0
         self.frame = 0
         self.frame_count = 0
-        self.frame_start = 0
-        self.frame_end = 0
+        self.frame_start = [0]*n_channels
+        self.frame_end = [0]*n_channels
         self.state = ReceiverState.Crafting
         x_train = numpy.array([])
         y_train = numpy.array([])
@@ -260,29 +269,35 @@ class Receiver(Client):
     def label_predict(self, x_pred):
         prediction = self.predict(x_pred)
         logging.debug("Receiver: prediction %s", prediction)
-        # TODO: must return max element only
         return torch.argmax(prediction)
 
     def read_from_model(self):
 
-        x_pred = torch.from_numpy(self.x_train[[0]])
-        pred = self.label_predict(x_pred)
+        for c in range(self.n_channels):
 
-        if self.frame_count == 0:
-            self.frame_start = pred
-            logging.info("Receiver: frame starts with = %s", pred)
-        elif self.frame_count == self.frame - 1:
-            self.frame_end = pred
-            logging.info("Receiver: frame ends with = %s", pred)
+            x_train = numpy.array([self.image[0]])
+            x_train = x_train.astype('float32')
+            x_train /= 255
 
-            if self.frame_start == self.frame_end:
-                self.bit = 0
+            x_pred = torch.from_numpy(x_train[[0]])
+            pred = self.label_predict(x_pred)
+
+            if self.frame_count == 0:
+                self.frame_start[c] = pred
+                logging.info("Receiver: channel %s frame starts with = %s", c, pred)
+            elif self.frame_count == self.frame - 1:
+                self.frame_end[c] = pred
+                logging.info("Receiver: channel %s frame ends with = %s", c, pred)
+
+                if self.frame_start[c] == self.frame_end[c]:
+                    self.bit[c] = 0
+                else:
+                    self.bit[c] = 1
             else:
-                self.bit = 1
-            logging.info("Receiver: RECEIVED: %s", self.bit)
-        else:
-            pass
+                pass
 
+        logging.info("Receiver: RECEIVED: %s", self.bit)
+        log_event("Received " + str(self.bit))
         self.frame_count = (self.frame_count + 1) % self.frame
 
     def calibrate(self):
@@ -290,76 +305,84 @@ class Receiver(Client):
 
     def craft(self):
 
-        # should be random
-        i = 0
-        j = 0
+        random.seed()
+        c = 0
 
-        for c in range(n_channels):
+        while c < self.n_channels:
+
+            i = random.randint(MNIST_SIZE)
+            j = random.randint(MNIST_SIZE)
 
             image_i = bl.linearize(bl.get_image(i))
             image_j = bl.linearize(bl.get_image(j))
-            i_label = self.label_predict(create_sample(self.image_i))
+            i_label = self.label_predict(create_sample(image_i))
 
-            imageH = bl.hmix(self.image_i, self.image_j, ALPHA)
+            imageH = bl.hmix(image_i, image_j, ALPHA)
             H_label = self.label_predict(create_sample(imageH))
 
-            alpha, y0_label, y1_label = self.hsearch(i_label, H_label, 0, ALPHA)
+            alpha, y0_label, y1_label = self.hsearch(image_i, image_j, i_label, H_label, 0, ALPHA)
 
             if alpha > 0:
-                logging.info("Finder: found hmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
+                logging.info("Receiver: found hmix(%s, %s, %s) = %s | %s", i, j, alpha, y0_label, y1_label)
+                self.images[c] = bl.hmix(image_i, image_j, alpha)
+                self.labels[c] = [y0_label, y1_label]
+                c += 1
             else:
-                logging.debug("Finder: not found for (%s,%s)", self.i, self.j)
+                logging.debug("Receiver: not found for (%s,%s)", i, j)
 
-            imageV = bl.vmix(self.image_i, self.image_j, ALPHA)
+            if c >= self.n_channels:
+                break
+
+            imageV = bl.vmix(image_i, image_j, ALPHA)
             V_label = self.label_predict(create_sample(imageV))
 
-            alpha, y0_label, y1_label = self.vsearch(i_label, V_label, 0, ALPHA)
+            alpha, y0_label, y1_label = self.vsearch(image_i, image_j, i_label, V_label, 0, ALPHA)
 
             if alpha > 0:
-                logging.info("Finder: found vmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
+                logging.info("Receiver: found vmix(%s, %s, %s) = %s | %s", i, j, alpha, y0_label, y1_label)
+                self.images[c] = bl.vmix(image_i, image_j, alpha)
+                self.labels[c] = [y0_label, y1_label]
+                c += 1
             else:
-                logging.debug("Finder: not found for (%s,%s)", self.i, self.j)
+                logging.debug("Receiver: not found for (%s,%s)", i, j)
 
-            self.i += 1
-
-            if self.i > MNIST_SIZE:
-                self.i = 0
-                self.j = (self.j + 1) % MNIST_SIZE
-
-        xB_sample = create_sample(self.original)
-        yB_label = self.label_predict(xB_sample)
-
-        imageT = cancelFromLeft(self.original, 0.5)
-        xT_sample = create_sample(imageT)
-        yT_label = self.label_predict(xT_sample)
-
-        alpha, y0_label, y1_label = self.search(yB_label, yT_label, 0, ALPHA)
-
-        logging.info("Receiver: found edge cut alpha = %s, y0 = %s, y1 = %s", alpha, y0_label, y1_label)
-
-        self.image = cancelFromLeft(self.original, alpha)
-        self.x_train = numpy.array([self.image, self.image])
-        self.y_train = numpy.array([y0_label, y1_label])
-        self.x_train = self.x_train.astype('float32')
-        self.x_train /= 255
+        logging.info("Receiver: channels ready")
 
         self.state = ReceiverState.Calibrating
 
-    def search(self, y0_label, y1_label, alpha_min, alpha_max):
+    def hsearch(self, image_i, image_j, y0_label, y1_label, alpha_min, alpha_max):
 
-        logging.debug("Searching between %s and %s", y0_label, y1_label)
-        assert (y0_label != y1_label), "Labels cannot be equal"
+        logging.debug("H-searching between %s and %s", y0_label, y1_label)
+
+        if y0_label == y1_label:
+            return -1,None,None
 
         if alpha_max < alpha_min + SEARCH_THREASHOLD:
             return alpha_min, y0_label, y1_label
 
-        imageM = cancelFromLeft(self.original, (alpha_min + alpha_max) / 2)
-        xM_sample = create_sample(imageM)
-        yM_label = self.label_predict(xM_sample)
+        imageM = bl.hmix(image_i, image_j, (alpha_min + alpha_max) / 2)
+        yM_label = self.label_predict(create_sample(imageM))
         if y0_label != yM_label:
-            return self.search(y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
+            return self.hsearch(image_i, image_j, y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
         else:
-            return self.search(yM_label, y1_label, (alpha_min + alpha_max) / 2, alpha_max)
+            return self.hsearch(image_i, image_j, yM_label, y1_label, (alpha_min + alpha_max) / 2, alpha_max)
+
+    def vsearch(self, image_i, image_j, y0_label, y1_label, alpha_min, alpha_max):
+
+        logging.debug("V-searching between %s and %s", y0_label, y1_label)
+
+        if y0_label == y1_label:
+            return -1,None,None
+
+        if alpha_max < alpha_min + SEARCH_THREASHOLD:
+            return alpha_min, y0_label, y1_label
+
+        imageM = bl.vmix(image_i, image_j, (alpha_min + alpha_max) / 2)
+        yM_label = self.label_predict(create_sample(imageM))
+        if y0_label != yM_label:
+            return self.vsearch(image_i, image_j, y0_label, yM_label, alpha_min, (alpha_min + alpha_max) / 2)
+        else:
+            return self.vsearch(image_i, image_j, yM_label, y1_label, (alpha_min + alpha_max) / 2, alpha_max)
 
 
 class Observer(Client):
@@ -367,8 +390,7 @@ class Observer(Client):
     def __init__(self,network_type):
         self.frame_count = 0
         self.frame = 0
-        self.x = 0
-        self.sample = None
+        self.samples = None
         x_train = numpy.array([])
         y_train = numpy.array([])
         x_train = x_train.astype('float32')
@@ -382,16 +404,19 @@ class Observer(Client):
         self.frame = frame
 
     def set_sample(self, s):
-        self.sample = s
+        self.samples = s
 
     def update_model_weights(self, main_model):
         logging.debug("Observer: update_model_weights()")
         super().update_model_weights(main_model)
 
-        if self.sample != None:
-            pred = self.predict(self.sample)
+        if self.samples != None:
+            pred = []
+            for c in range(len(self.samples)):
+                pred.append(self.predict(self.sample))
+                # update_plot(torch.argmax(pred))
+
             logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
-            update_plot(torch.argmax(pred))
             log_score(pred)
 
         if self.frame > 0:
@@ -497,7 +522,8 @@ def main():
     # setup.load("...")
 
     # 4. create Receiver
-    receiver = Receiver(ORIGINAL,network_type=setup_env.network_type)
+    # TODO: remove constant
+    receiver = Receiver(2,network_type=setup_env.network_type)
     setup.add_clients(receiver)
     log_event('Receiver added')
 
@@ -511,12 +537,12 @@ def main():
     logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
 
     # 6. create sender
-    sender = Sender(receiver.image, receiver.y_train, receiver.frame,network_type=setup_env.network_type)
+    sender = Sender(receiver.images, receiver.labels, receiver.n_channels, receiver.frame, network_type=setup_env.network_type)
     setup.add_clients(sender)
     log_event('Sender added')
-    observer.set_frame(receiver.frame)
 
-    observer.set_sample(create_sample(receiver.image))
+    observer.set_frame(receiver.frame)
+    observer.set_sample(create_samples(receiver.images))
 
     # 7. perform channel calibration
 
@@ -527,15 +553,14 @@ def main():
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
         check = check_transmission_success(sender, receiver)
-        if  check:
-            successful_transmissions += 1
-        else:
-            error_rate +=1
+        successful_transmissions += check
+        error_rate += (receiver.n_channels - check)
+
         log_event("Transmissions: " + str(r))
         log_event("Successful Transmissions: " + str(successful_transmissions))
         log_event("Errors:" + str(error_rate))
 
-    logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, NTRANS)
+    logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, (NTRANS*receiver.n_channels))
 
     log_event("FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
     log_event("FINAL ERROR: " + str(error_rate))
@@ -568,14 +593,12 @@ def main():
 def check_transmission_success(s, r):
     result = 0
     if s.bit is not None:
-        if s.bit == r.bit:
-            logging.info("Attacker: transmission SUCCESS")
-            result = 1
-        else:
-            logging.info("Attacker: transmission FAIL")
-            # increase_error_rate()
-        s.bit = None
-        r.bit = None
+        for c in range(len(s.bit)):
+            if s.bit[c] == r.bit[c]:
+                result += 1
+            s.bit[c] = None
+            r.bit[c] = None
+
     return result
 
 
