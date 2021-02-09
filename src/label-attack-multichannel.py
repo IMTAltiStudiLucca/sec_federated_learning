@@ -310,8 +310,10 @@ class Receiver(Client):
 
         while c < self.n_channels:
 
-            i = random.randint(MNIST_SIZE)
-            j = random.randint(MNIST_SIZE)
+            i = random.randint(0, MNIST_SIZE)
+            j = random.randint(0, MNIST_SIZE)
+
+            logging.info("Receiver: trying to craft from %s %s", i, j)
 
             image_i = bl.linearize(bl.get_image(i))
             image_j = bl.linearize(bl.get_image(j))
