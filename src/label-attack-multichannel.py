@@ -276,11 +276,11 @@ class Receiver(Client):
 
         for c in range(self.n_channels):
 
-            x_train = numpy.array([self.images[c]])
+            x_train = numpy.array(self.images[c])
             x_train = x_train.astype('float32')
             x_train /= 255
 
-            x_pred = torch.from_numpy(x_train[[c]])
+            x_pred = torch.from_numpy(x_train[c])
             pred = self.label_predict(x_pred)
 
             if self.frame_count == 0:
