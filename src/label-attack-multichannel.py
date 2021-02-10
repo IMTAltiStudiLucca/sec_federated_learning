@@ -158,6 +158,7 @@ class Sender(Client):
         self.frame_count = -1
         self.frame = frame
         self.frame_start = None
+        self.labels = labels
         x_train = numpy.array(images)
         x_train = x_train.astype('float32')
         x_train /= 255
@@ -206,20 +207,20 @@ class Sender(Client):
                 logging.info("Sender: channel %s injecting 1", c)
 
                 if self.frame_start == self.y_train[c][0]:
-                    logging.info("Sender: %s == %s", self.frame_start, self.y_train[c][0])
-                    y_train_trans = self.y_train[c][1]
+                    logging.debug("Sender: %s == %s", self.frame_start, self.y_train[c][0])
+                    y_train_trans = self.labels[c][1]
                 else:
-                    logging.info("Sender: %s != %s", self.frame_start, self.y_train[c][0])
-                    y_train_trans = self.y_train[c][0]
+                    logging.debug("Sender: %s != %s", self.frame_start, self.y_train[c][0])
+                    y_train_trans = self.labels[c][0]
 
-                logging.info("Sender: index %s", y_train_trans)
-                logging.info("Sender: x_train %s", self.x_train[c])
+                logging.debug("Sender: index %s", y_train_trans)
+                logging.debug("Sender: x_train %s", self.x_train[c])
                 # bias injection dataset
-                train_ds = TensorDataset([self.x_train[c]], y_train_trans)
+                train_ds = TensorDataset(self.x_train[c].reshape(1,784), torch.from_numpy(numpy.array([y_train_trans])))
                 train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
                 # bias testing dataset
-                test_ds = TensorDataset([self.x_train[c]], y_train_trans)
+                test_ds = TensorDataset(self.x_train[c].reshape(1,784), torch.from_numpy(numpy.array([y_train_trans])))
                 test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
                 for epoch in range(n_of_epoch):
@@ -323,7 +324,7 @@ class Receiver(Client):
             i = random.randint(0, MNIST_SIZE-1)
             j = random.randint(0, MNIST_SIZE-1)
 
-            logging.info("Receiver: trying to craft from %s %s", i, j)
+            logging.debug("Receiver: trying to craft from %s %s", i, j)
 
             image_i = bl.linearize(bl.get_image(i))
             image_j = bl.linearize(bl.get_image(j))
