@@ -280,8 +280,6 @@ class Receiver(Client):
             x_train = x_train.astype('float32')
             x_train /= 255
 
-            logging.info("Receiver: x_train %s", x_train)
-
             x_pred = torch.from_numpy(x_train[0])
             pred = self.label_predict(x_pred)
 
@@ -421,7 +419,7 @@ class Observer(Client):
         if self.samples != None:
             pred = []
             for c in range(len(self.samples)):
-                pred.append(self.predict(self.sample))
+                pred.append(self.predict(self.samples[c]))
                 # update_plot(torch.argmax(pred))
 
             logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
