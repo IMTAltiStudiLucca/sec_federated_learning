@@ -159,9 +159,12 @@ class Sender(Client):
         self.frame = frame
         self.frame_start = None
         x_train = numpy.array(images)
-        y_train = numpy.array(labels)
         x_train = x_train.astype('float32')
         x_train /= 255
+        x_train = torch.from_numpy(x_train)
+        y_train = numpy.array(labels)
+        y_train = torch.from_numpy(labels)
+
         super().__init__("Sender", x_train, y_train, x_train, y_train, network_type=network_type)
 
     # Covert channel send
@@ -203,18 +206,20 @@ class Sender(Client):
                 logging.info("Sender: channel %s injecting 1", c)
 
                 if self.frame_start == self.y_train[c][0]:
+                    logging.info("Sender: %s == %s", self.frame_start, self.y_train[c][0])
                     y_train_trans = self.y_train[c][1]
                 else:
+                    logging.info("Sender: %s != %s", self.frame_start, self.y_train[c][0])
                     y_train_trans = self.y_train[c][0]
 
                 logging.info("Sender: index %s", y_train_trans)
-                logging.info("Sender: x_train %s", self.x_train)
+                logging.info("Sender: x_train %s", self.x_train[c])
                 # bias injection dataset
-                train_ds = TensorDataset(self.x_train[[c]], numpy.array([y_train_trans]))
+                train_ds = TensorDataset([self.x_train[c]], y_train_trans)
                 train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
                 # bias testing dataset
-                test_ds = TensorDataset(self.x_train[[c]], numpy.array([y_train_trans]))
+                test_ds = TensorDataset([self.x_train[c]], y_train_trans)
                 test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
                 for epoch in range(n_of_epoch):

@@ -231,7 +231,7 @@ def slashed_zero():
     image = baseline_set_pixel(image, 255, 19, 11)
     image = baseline_set_pixel(image, 255, 20, 10)
     image = baseline_set_pixel(image, 255, 12, 19)
-    image = baseline_set_pixel(image, 255, 13, 18)
+    image = baseline_set_pixel(image, 255, 57603, 5760, 0.45312513, 18)
     image = baseline_set_pixel(image, 255, 14, 17)
     image = baseline_set_pixel(image, 255, 15, 16)
     image = baseline_set_pixel(image, 255, 16, 15)
@@ -257,16 +257,16 @@ def get_image(i):
     return image
 
 if __name__ == "__main__":
-    # vmix(0.2685546875, 7596, 22242) = tensor(4) | tensor(9)
-    image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[7596]
-    image2 = io.load_idx("../data/train-images-idx3-ubyte.gz")[22242]
+    # 57603, 5760, 0.453125
+    image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[57603]
+    image2 = io.load_idx("../data/train-images-idx3-ubyte.gz")[5760]
     # draw_digit(cancelFromLeft(image,0.6), 123)
-    # hmid = squarize(hmix(linearize(image1), linearize(image2), 0.4384765625))
-    vmid = squarize(vmix(linearize(image1), linearize(image2), 0.2685546875))
+    hmid = squarize(hmix(linearize(image1), linearize(image2), 0.453125))
+    #vmid = squarize(vmix(linearize(image1), linearize(image2), 0.2685546875))
 
-    draw_digit(image1,7596)
-    draw_digit(image2,22242)
-    # print_digit(hmid)
-    draw_digit(vmid,1337)
+    print_digit(image1)
+    print_digit(image2)
+    print_digit(hmid)
+    # draw_digit(vmid,1337)
     # print(linearize(image))
     # dotted_zero()
