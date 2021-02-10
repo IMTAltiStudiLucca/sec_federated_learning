@@ -316,8 +316,8 @@ class Receiver(Client):
 
         while c < self.n_channels:
 
-            i = random.randint(0, MNIST_SIZE)
-            j = random.randint(0, MNIST_SIZE)
+            i = random.randint(0, MNIST_SIZE-1)
+            j = random.randint(0, MNIST_SIZE-1)
 
             logging.info("Receiver: trying to craft from %s %s", i, j)
 
