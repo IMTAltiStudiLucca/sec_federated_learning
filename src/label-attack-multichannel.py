@@ -275,7 +275,7 @@ class Receiver(Client):
 
         for c in range(self.n_channels):
 
-            x_train = numpy.array([self.image[0]])
+            x_train = numpy.array([self.images[0]])
             x_train = x_train.astype('float32')
             x_train /= 255
 
