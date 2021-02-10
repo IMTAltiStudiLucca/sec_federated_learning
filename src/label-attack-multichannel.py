@@ -69,15 +69,6 @@ def log_event(e):
     event_dict['X'].append(timer)
     event_dict['E'].append(e)
 
-hl, = plt.plot([], [])
-#plt.ylim([20, 55])
-#plt.xlim([0, NTRAIN + (NTRANS * 12)])
-
-plt.xlabel('Time (FL rounds)', fontdict=font)
-plt.ylabel('Prediction', fontdict=font)
-plt.title('Covert Channel Comm. via Label Attack to a FL model', fontdict=font)
-
-
 def update_plot(y):
     global timer
     hl.set_xdata(numpy.append(hl.get_xdata(), [timer]))
@@ -88,45 +79,11 @@ def add_vline():
     global timer
     plt.axvline(x=timer)
 
-
 def signal_handler(sig, frame):
-    save_stats()
     sys.exit(0)
-
-
-def save_stats():
-    logging.info("SAVE STATS")
-    y_values = hl.get_ydata()
-    y_min = min(y_values) - DELTA_PLT_Y
-    y_max = max(y_values) + DELTA_PLT_Y
-    plt.ylim(y_min, y_max)
-    x_values = hl.get_xdata()
-    x_min = min(x_values) - DELTA_PLT_X
-    x_max = max(x_values) + DELTA_PLT_X
-    plt.xlim(x_min, x_max)
-    logging.info("save path: %s", save_path + "/output")
-    sdf = pandas.DataFrame(score_dict)
-    sdf.to_csv(save_path + '/' + SCORE_LOG)
-    edf = pandas.DataFrame(event_dict)
-    edf.to_csv(save_path + '/' +  EVENT_LOG)
-
-
-# compute slope through least square method
-def slope(y):
-    numer = 0
-    denom = 0
-    mean_x = (len(y) - 1) / 2
-    mean_y = numpy.mean(y)
-    for x in range(len(y)):
-        numer += (x - mean_x) * (y[x] - mean_y)
-        denom += (x - mean_x) ** 2
-    m = numer / denom
-    return m
-
 
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
-
 
 def create_sample(image):
     x_train = numpy.array([image])
@@ -294,7 +251,6 @@ class Receiver(Client):
                 self.frame_start[c] = pred
             elif self.frame_count == self.frame - 1:
                 self.frame_end[c] = pred
-                logging.info("Receiver: channel %s frame ends with = %s", c, pred)
 
                 if self.frame_start[c] == self.frame_end[c]:
                     self.bit[c] = 0
@@ -306,6 +262,7 @@ class Receiver(Client):
         if self.frame_count == 0:
             logging.info("Receiver: frame starts with = %s", self.frame_start)
         elif self.frame_count == self.frame - 1:
+            logging.info("Receiver: frame ends with = %s", self.frame_end)
             logging.info("Receiver: RECEIVED: %s", self.bit)
             log_event("Received " + str(self.bit))
 
@@ -568,6 +525,7 @@ def main():
         check = check_transmission_success(sender, receiver)
         successful_transmissions += check
         error_rate += (receiver.n_channels - check)
+        logging.info("Attacker: SUCCESS rate = %s/%s", check, receiver.n_channels)
 
         log_event("Transmissions: " + str(r))
         log_event("Successful Transmissions: " + str(successful_transmissions))
@@ -577,24 +535,7 @@ def main():
 
     log_event("FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
     log_event("FINAL ERROR: " + str(error_rate))
-
-    save_stats()
-
     log_event("ERROR RATE: " + str(error_rate))
-
-    save_stats()
-
-    y_values = hl.get_ydata()
-    y_min = min(y_values) - DELTA_PLT_Y
-    y_max = max(y_values) + DELTA_PLT_Y
-    plt.ylim(y_min, y_max)
-    x_values = hl.get_xdata()
-    x_min = min(x_values) - DELTA_PLT_X
-    x_max = max(x_values) + DELTA_PLT_X
-    plt.xlim(x_min, x_max)
-    # logging.info("FIGURE NAME: %s", os.path.join(setup_env.path, id_tests + '.png'))
-    plt.savefig(os.path.join(setup_env.path, id_tests + '.png'), dpi=300)
-    plt.savefig(os.path.join(setup_env.path, id_tests + '.svg'), dpi=300)
 
     sdf = pandas.DataFrame(score_dict)
     # logging.info("CSV NAME: %s", os.path.join(setup_env.path, SCORE_LOG))
