@@ -275,11 +275,12 @@ class Receiver(Client):
     def read_from_model(self):
 
         for c in range(self.n_channels):
-            x_train = numpy.array([self.images[0]])
+
+            x_train = numpy.array([self.images[c]])
             x_train = x_train.astype('float32')
             x_train /= 255
 
-            x_pred = torch.from_numpy(x_train[[0]])
+            x_pred = torch.from_numpy(x_train[[c]])
             pred = self.label_predict(x_pred)
 
             if self.frame_count == 0:
@@ -297,7 +298,7 @@ class Receiver(Client):
 
         if self.frame_count == 0:
             logging.info("Receiver: frame starts with = %s", self.frame_start)
-        elif self.frame_count == self.fram - 1:
+        elif self.frame_count == self.frame - 1:
             logging.info("Receiver: RECEIVED: %s", self.bit)
             log_event("Received " + str(self.bit))
 
