@@ -209,11 +209,11 @@ class Sender(Client):
 
                 logging.info("Sender: index %s", y_train_trans)
                 # bias injection dataset
-                train_ds = TensorDataset(self.x_train[c], [y_train_trans])
+                train_ds = TensorDataset(self.x_train[c], numpy.array([y_train_trans]))
                 train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
                 # bias testing dataset
-                test_ds = TensorDataset(self.x_train[c], [y_train_trans])
+                test_ds = TensorDataset(self.x_train[c], numpy.array([y_train_trans]))
                 test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
                 for epoch in range(n_of_epoch):
