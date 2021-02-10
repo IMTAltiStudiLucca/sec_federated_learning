@@ -159,9 +159,10 @@ class Sender(Client):
         self.frame = frame
         self.frame_start = None
         x_train = numpy.array(images)
+        y_train = numpy.array(labels)
         x_train = x_train.astype('float32')
         x_train /= 255
-        super().__init__("Sender", x_train, labels, x_train, labels, network_type=network_type)
+        super().__init__("Sender", x_train, y_train, x_train, y_train, network_type=network_type)
 
     # Covert channel send
     def call_training(self, n_of_epoch):
@@ -274,7 +275,6 @@ class Receiver(Client):
     def read_from_model(self):
 
         for c in range(self.n_channels):
-
             x_train = numpy.array([self.images[0]])
             x_train = x_train.astype('float32')
             x_train /= 255
@@ -284,7 +284,6 @@ class Receiver(Client):
 
             if self.frame_count == 0:
                 self.frame_start[c] = pred
-                logging.info("Receiver: channel %s frame starts with = %s", c, pred)
             elif self.frame_count == self.frame - 1:
                 self.frame_end[c] = pred
                 logging.info("Receiver: channel %s frame ends with = %s", c, pred)
@@ -296,8 +295,12 @@ class Receiver(Client):
             else:
                 pass
 
-        logging.info("Receiver: RECEIVED: %s", self.bit)
-        log_event("Received " + str(self.bit))
+        if self.frame_count == 0:
+            logging.info("Receiver: frame starts with = %s", self.frame_start)
+        elif self.frame_count == self.fram - 1:
+            logging.info("Receiver: RECEIVED: %s", self.bit)
+            log_event("Received " + str(self.bit))
+
         self.frame_count = (self.frame_count + 1) % self.frame
 
     def calibrate(self):
