@@ -163,7 +163,7 @@ class Sender(Client):
         x_train /= 255
         x_train = torch.from_numpy(x_train)
         y_train = numpy.array(labels)
-        y_train = torch.from_numpy(labels)
+        y_train = torch.from_numpy(y_train)
 
         super().__init__("Sender", x_train, y_train, x_train, y_train, network_type=network_type)
 
