@@ -14,6 +14,11 @@
 from scipy.stats import chi2_contingency
 from scipy.stats import chi2
 
+def chi_squared_test(table):
+    stat, p, dof, expected = chi2_contingency(table)
+    
+    return p
+
 """ Contingency Table
 This table summarizes the collected observations with one variable corresponding to columns and another variable 
 corresponding to rows. For instance, one variable is the couple of two digits and the other is another couple of
@@ -22,8 +27,8 @@ Each cell in the table corresponds to the count or frequency of observations tha
 categories. 
 
 Example: We would verify it the couple 1-7 is independent from the couple 3-8
-X = [digit-1  digit-7];
-Y = [digit-3  digit-8];
+X = [digit-1  digit-7];  X = [bit-0 bit-1]
+Y = [digit-3  digit-8];  Y = [bit-0 bit-1]
 
 and if we have a table as follows
 
