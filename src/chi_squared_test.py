@@ -15,24 +15,38 @@ from scipy.stats import chi2_contingency
 from scipy.stats import chi2
 
 """ Contingency Table
-Given a data set (e.g., MNIST) and two classification criteria X and Y (e.g., might be the digits: original + with a 
-bias), a contingency table is defined as a table showing the values of the frequencies of the values  of the data set 
-with respect to the different classes of criteria X and Y.
-Example:
-X = [digit-0  digit-0_with_fracture];
-Y = [digit-3  digit-3_with_black_corner];
-
+This table summarizes the collected observations with one variable corresponding to columns and another variable 
+corresponding to rows. For instance, one variable is the couple of two digits and the other is another couple of
+digits.
 Each cell in the table corresponds to the count or frequency of observations that correspond to the row and column 
-categories.
+categories. 
+
+Example: We would verify it the couple 1-7 is independent from the couple 3-8
+X = [digit-1  digit-7];
+Y = [digit-3  digit-8];
+
+and if we have a table as follows
+
+table = [[10, 20],
+         [6, 9]]
+10 corresponds to the times that I observed the couple digit-1 with digit-3.
 """
 
-table = [[10, 20, 30],
-         [6, 9, 17]]
+table = [[10, 20],
+         [6, 9]]
 print(table)
 
 stat, p, dof, expected = chi2_contingency(table)
 print('dof=%d' % dof)
 print(expected)
+
+""" Test statics
+    - Test Statistic ≥ Critical Value: significant result, reject null hypothesis, dependent (H1).
+        -- p-value ≤ alpha: significant result, reject null hypothesis, dependent (H1)
+􏰠    - Test Statistic < Critical Value: not significant result, fail to reject null hypothesis, independent (H0).
+        -- p-value > alpha: not significant result, fail to reject null hypothesis, independent (H0).
+"""
+
 
 """ Interpret test-statistic
 """
@@ -46,7 +60,7 @@ else:
 
 
 """ Interpret p-value
-The p value helps to understand if the difference between the observed result and the hypothesized one 
+The p-value helps to understand if the difference between the observed result and the hypothesized one 
 is due to the randomness introduced by the sampling, or if this difference is statistically significant, that is, 
 difficult to explain through the randomness due to the sampling.
 """
