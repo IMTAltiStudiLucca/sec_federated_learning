@@ -173,11 +173,20 @@ class Sender(Client):
                 logging.debug("Sender: index %s", y_train_trans)
                 logging.debug("Sender: x_train %s", self.x_train[c])
                 # bias injection dataset
-                train_ds = TensorDataset(self.x_train[c].reshape(1,784), torch.from_numpy(numpy.array([y_train_trans])))
+
+                x_train_reshaped = None
+                if self.network_type == 'CNN':
+                    x_train_reshaped = self.x_train[c].reshape(-1, 1, 28, 28)
+                elif self.network_type == 'NN':
+                    x_train_reshaped = self.x_train[c].reshape(1,784)
+                else:
+                    logging.error("Sender: unsupported network type")
+
+                train_ds = TensorDataset(x_train_reshaped, torch.from_numpy(numpy.array([y_train_trans])))
                 train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
 
                 # bias testing dataset
-                test_ds = TensorDataset(self.x_train[c].reshape(1,784), torch.from_numpy(numpy.array([y_train_trans])))
+                test_ds = TensorDataset(x_train_reshaped, torch.from_numpy(numpy.array([y_train_trans])))
                 test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
 
                 for epoch in range(n_of_epoch):
@@ -273,15 +282,18 @@ class Receiver(Client):
 
     def craft(self):
 
+        logging.info("Sender: crafting channel samples")
+
         random.seed()
         c = 0
+        #allocated = []
 
         while c < self.n_channels:
 
             i = random.randint(0, MNIST_SIZE-1)
             j = random.randint(0, MNIST_SIZE-1)
 
-            logging.debug("Receiver: trying to craft from %s %s", i, j)
+            logging.info("Receiver: trying to craft from %s %s", i, j)
 
             image_i = bl.linearize(bl.get_image(i))
             image_j = bl.linearize(bl.get_image(j))
@@ -292,10 +304,12 @@ class Receiver(Client):
 
             alpha, y0_label, y1_label = self.hsearch(image_i, image_j, i_label, H_label, 0, ALPHA)
 
-            if alpha > 0:
+            if alpha > 0: # and not y0_label in allocated and not y1_label in allocated:
                 logging.info("Receiver: found hmix(%s, %s, %s) = %s | %s", i, j, alpha, y0_label, y1_label)
                 self.images[c] = bl.hmix(image_i, image_j, alpha)
                 self.labels[c] = [y0_label, y1_label]
+                #allocated.append(y0_label)
+                #allocated.append(y1_label)
                 c += 1
             else:
                 logging.debug("Receiver: not found for (%s,%s)", i, j)
@@ -308,10 +322,12 @@ class Receiver(Client):
 
             alpha, y0_label, y1_label = self.vsearch(image_i, image_j, i_label, V_label, 0, ALPHA)
 
-            if alpha > 0:
+            if alpha > 0: # and not y0_label in allocated and not y1_label in allocated:
                 logging.info("Receiver: found vmix(%s, %s, %s) = %s | %s", i, j, alpha, y0_label, y1_label)
                 self.images[c] = bl.vmix(image_i, image_j, alpha)
                 self.labels[c] = [y0_label, y1_label]
+                #allocated.append(y0_label)
+                #allocated.append(y1_label)
                 c += 1
             else:
                 logging.debug("Receiver: not found for (%s,%s)", i, j)
@@ -419,6 +435,11 @@ class Setup_env:
         self.docker = True
         self.saved = False
 
+        if "n_channels" in self.settings['setup'].keys():
+            self.n_channels = self.settings['setup']['n_channels']
+        else:
+            self.n_channels = 1
+
         if "docker" in self.settings['setup'].keys():
             self.docker = self.settings['setup']['docker']
 
@@ -492,8 +513,7 @@ def main():
     # setup.load("...")
 
     # 4. create Receiver
-    # TODO: remove constant
-    receiver = Receiver(2,network_type=setup_env.network_type)
+    receiver = Receiver(setup_env.n_channels,network_type=setup_env.network_type)
     setup.add_clients(receiver)
     log_event('Receiver added')
 
