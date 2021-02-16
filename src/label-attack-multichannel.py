@@ -14,11 +14,16 @@ import sys
 import baseliner as bl
 import random
 
+from chi_squared_test import chi_squared_test
 from datetime import datetime
 import yaml
 import os
 import subprocess
 
+
+
+# something strange with RNG
+random.seed()
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
 MNIST_SIZE = 60000
@@ -114,7 +119,7 @@ class Sender(Client):
         self.sent = False
         self.frame_count = -1
         self.frame = frame
-        self.frame_start = None
+        self.frame_start = [0]*n_channels
         self.labels = labels
         x_train = numpy.array(images)
         x_train = x_train.astype('float32')
@@ -139,11 +144,11 @@ class Sender(Client):
 
         if self.frame_count == 0:
             # x_pred = torch.from_numpy(self.x_train[[0]])
-            self.frame_start = self.label_predict(self.x_train[[0]])
-            logging.info("Sender: frame starts with %s", self.frame_start)
             for c in range(self.n_channels):
+                self.frame_start[c] = self.label_predict(self.x_train[[c]])
                 self.bit[c] = random.randint(0, 1)
 
+            logging.info("Sender: frame starts with %s", self.frame_start)
             logging.info("Sender: SENDING %s", self.bit)
             log_event("Sent " + str(self.bit))
 
@@ -159,15 +164,17 @@ class Sender(Client):
     def send_to_model(self, n_of_epoch):
 
         for c in range(self.n_channels):
-            if self.bit[c] == 1:
+            pred = self.label_predict(self.x_train[[c]])
+            logging.info("Sender: start = %s, current %s", self.frame_start[c], pred)
+            if self.bit[c] == 1 and self.frame_start[c] == pred:
                 # change prediction
-                logging.info("Sender: channel %s injecting 1", c)
+                logging.info("Sender: channel %s switching from %s", c, self.frame_start[c])
 
-                if self.frame_start == self.y_train[c][0]:
-                    logging.debug("Sender: %s == %s", self.frame_start, self.y_train[c][0])
+                if self.frame_start[c] == self.y_train[c][0]:
+                    logging.debug("Sender: %s == %s", self.frame_start[c], self.y_train[c][0])
                     y_train_trans = self.labels[c][1]
                 else:
-                    logging.debug("Sender: %s != %s", self.frame_start, self.y_train[c][0])
+                    logging.debug("Sender: %s != %s", self.frame_start[c], self.y_train[c][0])
                     y_train_trans = self.labels[c][0]
 
                 logging.debug("Sender: index %s", y_train_trans)
@@ -193,9 +200,40 @@ class Sender(Client):
                     train_loss, train_accuracy = self.train(train_dl)
                     test_loss, test_accuracy = self.validation(test_dl)
 
+            elif self.bit[c] == 0 and not self.frame_start[c] == pred:
+                logging.info("Sender: channel %s restoring %s", c, self.frame_start[c])
+
+                if self.frame_start[c] == self.y_train[c][0]:
+                    logging.debug("Sender: %s == %s", self.frame_start[c], self.y_train[c][0])
+                    y_train_trans = self.labels[c][0]
+                else:
+                    logging.debug("Sender: %s != %s", self.frame_start[c], self.y_train[c][0])
+                    y_train_trans = self.labels[c][1]
+
+                logging.debug("Sender: index %s", y_train_trans)
+                logging.debug("Sender: x_train %s", self.x_train[c])
+                # bias injection dataset
+
+                x_train_reshaped = None
+                if self.network_type == 'CNN':
+                    x_train_reshaped = self.x_train[c].reshape(-1, 1, 28, 28)
+                elif self.network_type == 'NN':
+                    x_train_reshaped = self.x_train[c].reshape(1,784)
+                else:
+                    logging.error("Sender: unsupported network type")
+
+                train_ds = TensorDataset(x_train_reshaped, torch.from_numpy(numpy.array([y_train_trans])))
+                train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE)
+
+                # bias testing dataset
+                test_ds = TensorDataset(x_train_reshaped, torch.from_numpy(numpy.array([y_train_trans])))
+                test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE)
+
+                for epoch in range(n_of_epoch):
+                    train_loss, train_accuracy = self.train(train_dl)
+                    test_loss, test_accuracy = self.validation(test_dl)
             else:
-                logging.info("Sender: channel %s injecting 0", c)
-                # do nothing, prediction should stay unchanged
+                logging.info("Sender: channel already set")
 
 class Receiver(Client):
 
@@ -284,7 +322,6 @@ class Receiver(Client):
 
         logging.info("Sender: crafting channel samples")
 
-        random.seed()
         c = 0
         #allocated = []
 
@@ -293,7 +330,7 @@ class Receiver(Client):
             i = random.randint(0, MNIST_SIZE-1)
             j = random.randint(0, MNIST_SIZE-1)
 
-            logging.info("Receiver: trying to craft from %s %s", i, j)
+            logging.debug("Receiver: trying to craft from %s %s", i, j)
 
             image_i = bl.linearize(bl.get_image(i))
             image_j = bl.linearize(bl.get_image(j))
@@ -539,10 +576,15 @@ def main():
     # 8. start transmitting
     successful_transmissions = 0
     error_rate = 0
+
+    contingency_table_receiver = [[1,1],[1,1]]
+    contingency_table_sender = [[0,0],[0,0]]
+    logging.debug("Attacker: contingency table %s", contingency_table_receiver)
+
     for r in range(NTRANS):
         logging.info("Attacker: starting transmission frame")
         setup.run(federated_runs=receiver.frame)
-        check = check_transmission_success(sender, receiver)
+        check, contingency_table_receiver, contingency_table_sender = check_transmission_success(sender, receiver, contingency_table_receiver, contingency_table_sender)
         successful_transmissions += check
         error_rate += (receiver.n_channels - check)
         logging.info("Attacker: SUCCESS rate = %s/%s", check, receiver.n_channels)
@@ -552,6 +594,13 @@ def main():
         log_event("Errors:" + str(error_rate))
 
     logging.info("ATTACK TERMINATED: %s/%s bits succesfully transimitted", successful_transmissions, (NTRANS*receiver.n_channels))
+
+    if(receiver.n_channels == 2):
+        logging.info("CONTINGENCY TABLE RECEIVER %s", contingency_table_receiver)
+        logging.info("CONTINGENCY TABLE SENDER %s", contingency_table_sender)
+        p_value = chi_squared_test(contingency_table_receiver)
+        logging.info("P-VALUE = %s", p_value)
+        log_event("CONTINGENCY TABLE " +str(contingency_table_receiver)+ " P-VALUE = " + str(p_value))
 
     log_event("FINAL SUCCESSFUL TRANSMISSIONS: " + str(successful_transmissions) )
     log_event("FINAL ERROR: " + str(error_rate))
@@ -564,16 +613,20 @@ def main():
     edf.to_csv(os.path.join(setup_env.path, EVENT_LOG))
 
 
-def check_transmission_success(s, r):
+def check_transmission_success(s, r, tr, ts):
     result = 0
     if s.bit is not None:
+        if r.n_channels == 2:
+            tr[r.bit[0]][r.bit[1]] += 1
+            ts[s.bit[0]][s.bit[1]] += 1
+
         for c in range(len(s.bit)):
             if s.bit[c] == r.bit[c]:
                 result += 1
             s.bit[c] = None
             r.bit[c] = None
 
-    return result
+    return result, tr, ts
 
 
 if __name__ == '__main__':

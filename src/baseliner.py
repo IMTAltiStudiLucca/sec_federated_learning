@@ -231,7 +231,7 @@ def slashed_zero():
     image = baseline_set_pixel(image, 255, 19, 11)
     image = baseline_set_pixel(image, 255, 20, 10)
     image = baseline_set_pixel(image, 255, 12, 19)
-    image = baseline_set_pixel(image, 255, 57603, 5760, 0.45312513, 18)
+    image = baseline_set_pixel(image, 255, 13, 18)
     image = baseline_set_pixel(image, 255, 14, 17)
     image = baseline_set_pixel(image, 255, 15, 16)
     image = baseline_set_pixel(image, 255, 16, 15)
