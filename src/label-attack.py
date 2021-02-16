@@ -194,7 +194,11 @@ class Sender(Client):
             # x_pred = torch.from_numpy(self.x_train[[0]])
             self.frame_start = self.label_predict(self.x_train[[0]])
             logging.info("Sender: frame starts with %s", self.frame_start)
-            self.bit = random.randint(0, 1)
+            if self.pattern is None:
+                self.bit = random.randint(0, 1)
+            else:
+                self.bit = int(self.pattern[0])
+                self.pattern =  self.pattern[1:] + self.pattern[0:1]
             logging.info("Sender: SENDING %s", self.bit)
 
         self.frame_count = (self.frame_count + 1) % self.frame
@@ -328,7 +332,10 @@ class Receiver(Client):
         self.x_train = self.x_train.astype('float32')
         self.x_train /= 255
 
-        self.state = ReceiverState.Calibrating
+        if self.frame < 1:
+            self.state = ReceiverState.Calibrating
+        else:
+            self.state = ReceiverState.Ready
 
     def search(self, y0_label, y1_label, alpha_min, alpha_max):
 
@@ -407,6 +414,16 @@ class Setup_env:
         self.network_type = self.settings['setup']['network_type']
         self.docker = True
         self.saved = False
+
+        if "pattern" in self.settings['setup'].keys():
+            self.pattern = self.settings['setup']['pattern']
+        else:
+            self.pattern = None
+
+        if "frame_size" in self.settings['setup'].keys():
+            self.frame_size = self.settings['setup']['frame_size']
+        else:
+            self.frame_size = 0
 
         if "docker" in self.settings['setup'].keys():
             self.docker = self.settings['setup']['docker']
@@ -495,7 +512,7 @@ def main():
     logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
 
     # 6. create sender
-    sender = Sender(receiver.image, receiver.y_train, receiver.frame,network_type=setup_env.network_type)
+    sender = Sender(receiver.image, receiver.y_train, receiver.frame, setup_env.pattern, network_type=setup_env.network_type)
     setup.add_clients(sender)
     log_event(observer.x, 'Sender added')
     observer.set_frame(receiver.frame)
@@ -514,7 +531,7 @@ def main():
         if  check:
             successful_transmissions += 1
         else:
-            error_rate +=1 
+            error_rate +=1
         log_event(observer.x, "Transmissions: " + str(r))
         log_event(observer.x, "Successful Transmissions: " + str(successful_transmissions))
         log_event(observer.x, "Errors:" + str(error_rate))

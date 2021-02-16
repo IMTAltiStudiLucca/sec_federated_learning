@@ -113,12 +113,13 @@ class ReceiverState(enum.Enum):
 
 class Sender(Client):
 
-    def __init__(self, images, labels, n_channels, frame, network_type):
+    def __init__(self, images, labels, n_channels, frame, pattern, network_type):
         self.bit = [None]*n_channels
         self.n_channels = n_channels
         self.sent = False
         self.frame_count = -1
         self.frame = frame
+        self.pattern = pattern
         self.frame_start = [0]*n_channels
         self.labels = labels
         x_train = numpy.array(images)
@@ -146,7 +147,12 @@ class Sender(Client):
             # x_pred = torch.from_numpy(self.x_train[[0]])
             for c in range(self.n_channels):
                 self.frame_start[c] = self.label_predict(self.x_train[[c]])
-                self.bit[c] = random.randint(0, 1)
+
+                if self.pattern is None:
+                    self.bit[c] = random.randint(0, 1)
+                else:
+                    self.bit[c] = int(self.pattern[0])
+                    self.pattern =  self.pattern[1:] + self.pattern[0:1]
 
             logging.info("Sender: frame starts with %s", self.frame_start)
             logging.info("Sender: SENDING %s", self.bit)
@@ -237,13 +243,13 @@ class Sender(Client):
 
 class Receiver(Client):
 
-    def __init__(self,n_channels,network_type):
+    def __init__(self,n_channels,frame_size,network_type):
         self.bit = [None]*n_channels
         self.n_channels = n_channels
         self.images = [None]*n_channels
         self.labels = [None]*n_channels
         self.selection_count = 0
-        self.frame = 0
+        self.frame = frame_size
         self.frame_count = 0
         self.frame_start = [0]*n_channels
         self.frame_end = [0]*n_channels
@@ -257,6 +263,7 @@ class Receiver(Client):
         logging.debug("Receiver: call_training()")
 
         if self.state == ReceiverState.Calibrating:
+
             self.selection_count += 1
             logging.info("Receiver: selected %s times", self.selection_count)
             if self.selection_count > NSELECTION:
@@ -371,7 +378,10 @@ class Receiver(Client):
 
         logging.info("Receiver: channels ready")
 
-        self.state = ReceiverState.Calibrating
+        if self.frame < 1:
+            self.state = ReceiverState.Calibrating
+        else:
+            self.state = ReceiverState.Ready
 
     def hsearch(self, image_i, image_j, y0_label, y1_label, alpha_min, alpha_max):
 
@@ -477,6 +487,16 @@ class Setup_env:
         else:
             self.n_channels = 1
 
+        if "pattern" in self.settings['setup'].keys():
+            self.pattern = str(self.settings['setup']['pattern'])
+        else:
+            self.pattern = None
+
+        if "frame_size" in self.settings['setup'].keys():
+            self.frame_size = self.settings['setup']['frame_size']
+        else:
+            self.frame_size = 0
+
         if "docker" in self.settings['setup'].keys():
             self.docker = self.settings['setup']['docker']
 
@@ -550,7 +570,7 @@ def main():
     # setup.load("...")
 
     # 4. create Receiver
-    receiver = Receiver(setup_env.n_channels,network_type=setup_env.network_type)
+    receiver = Receiver(setup_env.n_channels,setup_env.frame_size,network_type=setup_env.network_type)
     setup.add_clients(receiver)
     log_event('Receiver added')
 
@@ -564,7 +584,7 @@ def main():
     logging.info("Attacker: ready to transmit with frame size %s", receiver.frame)
 
     # 6. create sender
-    sender = Sender(receiver.images, receiver.labels, receiver.n_channels, receiver.frame, network_type=setup_env.network_type)
+    sender = Sender(receiver.images, receiver.labels, receiver.n_channels, receiver.frame, setup_env.pattern, network_type=setup_env.network_type)
     setup.add_clients(sender)
     log_event('Sender added')
 

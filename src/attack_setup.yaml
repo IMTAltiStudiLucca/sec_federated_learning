@@ -19,5 +19,7 @@ setup:
   tests_dir: './tests'
   n_channels: 2
   n_bits: 50
+  pattern: 11001001
+  frame_size: 8
   n_Rcal: 1
   n_train_offset: 1
