@@ -422,6 +422,11 @@ class Server:
         out_path = os.path.join(path, "main_model")
         torch.save(self.main_model.state_dict(), out_path)
 
+    def get_accuracy(self, idx_client=0):
+        if idx_client < len(self.list_of_clients):
+            return self.list_of_clients[idx_client].test_accuracy
+        else:
+            return None
 
 class Client:
     '''A client who has its own dataset to use for training.
@@ -481,6 +486,10 @@ class Client:
 
         self.criterion_name = "criterion" + str(self.id)
         self.criterion_info = nn.CrossEntropyLoss()
+        self.test_accuracy = 0
+        self.train_accuracy = 0
+        self.train_loss = 1
+        self.test_loss = 1
 
     def update_model_weights(self, main_model):
         if self.network_type == 'NN':
@@ -516,11 +525,11 @@ class Client:
 
         for epoch in range(n_of_epoch):
 
-            train_loss, train_accuracy = self.train(train_dl)
-            test_loss, test_accuracy = self.validation(test_dl)
+            self.train_loss, self.train_accuracy = self.train(train_dl)
+            self.test_loss, self.test_accuracy = self.validation(test_dl)
 
             logging.debug("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch + 1) +
-                          " | train accuracy: {:7.5f}".format(train_accuracy) + " | test accuracy: {:7.5f}".format(test_accuracy))
+                          " | train accuracy: {:7.5f}".format(self.train_accuracy) + " | test accuracy: {:7.5f}".format(self.test_accuracy))
 
     def train(self, train_dl):
         logging.debug("INSIDE THE TRAINING CLIENT {}".format(self.id))
