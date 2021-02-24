@@ -167,16 +167,17 @@ class ReceiverState(enum.Enum):
 
 class Sender(Client):
 
-    def __init__(self, receiverImage, y_train, frame,network_type):
+    def __init__(self, receiverImage, y_train, frame, pattern, network_type):
         self.bit = None
         self.sent = False
         self.frame_count = -1
         self.frame = frame
+        self.pattern = pattern
         self.frame_start = None
         x_train = numpy.array([receiverImage, receiverImage])
         x_train = x_train.astype('float32')
         x_train /= 255
-        super().__init__("Sender", x_train, y_train, x_train, y_train,network_type=network_type)
+        super().__init__("Sender", x_train, y_train, x_train, y_train, network_type=network_type)
 
     # Covert channel send
     def call_training(self, n_of_epoch):
@@ -498,7 +499,7 @@ def main():
     # setup.load("...")
 
     # 4. create Receiver
-    receiver = Receiver(ORIGINAL,network_type=setup_env.network_type)
+    receiver = Receiver(ORIGINAL, network_type=setup_env.network_type)
     setup.add_clients(receiver)
     log_event(observer.x, 'Receiver added')
 
