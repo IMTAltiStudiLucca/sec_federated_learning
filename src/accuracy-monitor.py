@@ -420,10 +420,11 @@ class Receiver(Client):
 
 class Observer(Client):
 
-    def __init__(self,network_type):
+    def __init__(self,setup,network_type):
         self.frame_count = 0
         self.frame = 0
         self.samples = None
+        self.setup = setup
         x_train = numpy.array([])
         y_train = numpy.array([])
         x_train = x_train.astype('float32')
@@ -451,6 +452,9 @@ class Observer(Client):
 
             logging.debug("Observer: global prediction = %s, frame_count = %s", pred, self.frame_count)
             log_score(pred)
+            accuracy = self.setup.server.get_accuracy()
+            log_event('accuracy: ' + str(accuracy))
+            logging.info("Observer: current accuracy = %s", accuracy)
 
         if self.frame > 0:
             if self.frame_count == 0:
@@ -562,7 +566,7 @@ def main():
     setup = Setup(args.conf_file)
 
     # 2.2 add observer
-    observer = Observer(network_type=setup_env.network_type)
+    observer = Observer(setup, network_type=setup_env.network_type)
     setup.add_clients(observer)
 
     # 3. run N rounds OR load pre-trained models
