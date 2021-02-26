@@ -256,6 +256,25 @@ def get_image(i):
     image = io.load_idx("../data/train-images-idx3-ubyte.gz")[i]
     return image
 
+class ImageIter:
+
+    """MNIST iterable."""
+
+    def __init__(self, start=0):
+        self.num = start
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        img = get_image(self.num)
+        self.num = (self.num + 1) % 60000
+        return img
+
+def get_images():
+    imgiter = ImageIter()
+    return [img for img in imgiter]
+
 if __name__ == "__main__":
     # hmix(3936, 41172, 0.365234375)
     image1 = io.load_idx("../data/train-images-idx3-ubyte.gz")[3936]

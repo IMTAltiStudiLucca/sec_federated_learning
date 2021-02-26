@@ -21,7 +21,7 @@ import subprocess
 
 SEARCH_THREASHOLD = 1 / (28 * 28)
 MNIST_SIZE = 60000
-ROUNDS = 100
+SAMPLES = 6000
 ALPHA = 0.5
 
 
@@ -55,11 +55,19 @@ class Finder(Client):
 
         logging.info("Finder: starting edge sample search at %s, %s", self.i, self.j)
 
-        tot = ROUNDS**2
-        for x in range(tot):
-            print("Processing: {:.2%}".format(x/tot), end="\r", flush=True)
-            self.craft()
+        i = random.sample(range(MNIST_SIZE-1), SAMPLES)
+        j = random.sample(range(MNIST_SIZE-1), SAMPLES)
 
+        fh,fv = 0,0
+        for x in range(SAMPLES):
+            print("Processing: {:.2%}".format(x/SAMPLES), end="\r", flush=True)
+            ih,iv = self.craft(i[x],j[x])
+            fh += ih
+            fv += iv
+
+        print("Edge examples search terminarated")
+        print("Total attempts " + str(SAMPLES * 2) + " H " + str(SAMPLES) + " V " + str(SAMPLES))
+        print("Found edge examples " + str(fh+fv) + " H " + str(fh) + " V " + str(fv))
         logging.info("Finder: edge sample search terminated")
 
 
@@ -69,7 +77,12 @@ class Finder(Client):
         # TODO: must return max element only
         return torch.argmax(prediction)
 
-    def craft(self):
+    def craft(self, x1, x2):
+
+        self.i = x1
+        self.j = x2
+
+        fh,fv = 0,0
 
         self.image_i = bl.linearize(bl.get_image(self.i))
         self.image_j = bl.linearize(bl.get_image(self.j))
@@ -82,6 +95,7 @@ class Finder(Client):
 
         if alpha > 0:
             logging.info("Finder: found hmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
+            fh += 1
         else:
             logging.debug("Finder: not found for (%s,%s)", self.i, self.j)
 
@@ -92,14 +106,17 @@ class Finder(Client):
 
         if alpha > 0:
             logging.info("Finder: found vmix(%s, %s, %s) = %s | %s", alpha, self.i, self.j, y0_label, y1_label)
+            fv += 1
         else:
             logging.debug("Finder: not found for (%s,%s)", self.i, self.j)
 
-        self.i += 1
+        return fh, fv
 
-        if self.i > MNIST_SIZE:
-            self.i = 0
-            self.j = (self.j + 1) % MNIST_SIZE
+        #self.i += 1
+
+        #if self.i > MNIST_SIZE:
+        #    self.i = 0
+        #    self.j = (self.j + 1) % MNIST_SIZE
 
     def hsearch(self, y0_label, y1_label, alpha_min, alpha_max):
 
@@ -230,5 +247,5 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='[+] %(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='[+] %(asctime)s %(levelname)s: %(message)s', level=logging.WARNING)
     main()
