@@ -385,7 +385,13 @@ class Server:
 
         return cnn1_mean_weight, cnn1_mean_bias, cnn2_mean_weight, cnn2_mean_bias, fc1_mean_weight, fc1_mean_bias
 
-    def get_anomalous_client_nn(self, distance="euclidean"):
+    def get_anomalous_client_nn(self, norm="fro"):
+        """
+            - `norm` refers to the type of the norm to be calculated between the two weight matrices:
+              by default this is "fro", which stands for Frobenius norm (a.k.a. L2-norm)
+              Other possible values are those indicated by the numpy API's: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+              e.g., 1, np.inf, "nuc", etc.
+        """
         
         # 1. get current global model parameters
         current_server_fc1 = self.main_model.fc1.weight.data
@@ -395,75 +401,52 @@ class Server:
         max_distance = 0
         c_avg_distance = 0
 
-        if distance == "euclidean":
+        # 2. check the client with the largest average distance w.r.t. the current global model
+        for c in self.selected_clients:
+            c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data.clone(), ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_fc2 - c.model.fc2.weight.data.clone(), ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_fc3 - c.model.fc3.weight.data.clone(), ord=norm)
+            
+            c_avg_distance = c_avg_distance / 3
+            
+            if c_avg_distance > max_distance:
+                self.current_anomalous_client = c.id
+                max_distance = c_avg_distance
 
-            # 2. check the client with the largest average distance w.r.t. the current global model
-            for c in self.selected_clients:
-                c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data.clone())
-                c_avg_distance += np.linalg.norm(current_server_fc2 - c.model.fc2.weight.data.clone())
-                c_avg_distance += np.linalg.norm(current_server_fc3 - c.model.fc3.weight.data.clone())
-                
-                c_avg_distance = c_avg_distance / 3
-                
-                if c_avg_distance > max_distance:
-                    self.current_anomalous_client = c.id
-                    max_distance = c_avg_distance
+            
+        logging.info("Current anomalous is: {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, norm, max_distance))
 
-        elif distance == "cosine":
-            # 2. check the client with the largest average distance w.r.t. the current global model
-            for c in self.selected_clients:
-                c_avg_distance += np.dot(current_server_fc1, c.model.fc1.weight.data.clone()) / (np.norm(current_server_fc1) * np.norm(c.model.fc1.weight.data.clone()))
-                c_avg_distance += np.dot(current_server_fc2, c.model.fc2.weight.data.clone()) / (np.norm(current_server_fc2) * np.norm(c.model.fc2.weight.data.clone()))
-                c_avg_distance += np.dot(current_server_fc3, c.model.fc3.weight.data.clone()) / (np.norm(current_server_fc3) * np.norm(c.model.fc3.weight.data.clone()))
+    def get_anomalous_client_cnn(self, distance="fro"):
 
-                c_avg_distance = c_avg_distance / 3
-                
-                if c_avg_distance > max_distance:
-                    self.current_anomalous_client = c.id
-                    max_distance = c_avg_distance
-
-        logging.info("Current anomalous is: {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, distance, max_distance))
-
-    def get_anomalous_client_cnn(self, distance="euclidean"):
-
-        return
+        """
+            - `norm` refers to the type of the norm to be calculated between the two weight matrices:
+              by default this is "fro", which stands for Frobenius norm (a.k.a. L2-norm)
+              Other possible values are those indicated by the numpy API's: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+              e.g., 1, np.inf, "nuc", etc.
+        """
         
-        # # 1. get current global model parameters
-        # current_server_fc1 = self.main_model.fc1.weight.data
-        # current_server_fc2 = self.main_model.fc2.weight.data
-        # current_server_fc3 = self.main_model.fc3.weight.data
+        # 1. get current global model parameters
+        current_server_cnn1 = self.main_model.cnn1.weight.data
+        current_server_cnn2 = self.main_model.cnn2.weight.data
+        current_server_fc1 = self.main_model.fc1.weight.data
 
-        # max_distance = 0
-        # c_avg_distance = 0
+        max_distance = 0
+        c_avg_distance = 0
 
-        # if distance == "euclidean":
+        # 2. check the client with the largest average distance w.r.t. the current global model
+        for c in self.selected_clients:
+            c_avg_distance += np.linalg.norm(current_server_cnn1 - c.model.cnn1.weight.data.clone(), ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_cnn2 - c.model.cnn2.weight.data.clone(), ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data.clone(), ord=norm)
+            
+            c_avg_distance = c_avg_distance / 3
+            
+            if c_avg_distance > max_distance:
+                self.current_anomalous_client = c.id
+                max_distance = c_avg_distance
 
-        #     # 2. check the client with the largest average distance w.r.t. the current global model
-        #     for c in self.selected_clients:
-        #         c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data.clone())
-        #         c_avg_distance += np.linalg.norm(current_server_fc2 - c.model.fc2.weight.data.clone())
-        #         c_avg_distance += np.linalg.norm(current_server_fc3 - c.model.fc3.weight.data.clone())
-                
-        #         c_avg_distance = c_avg_distance / 3
-                
-        #         if c_avg_distance > max_distance:
-        #             self.current_anomalous_client = c.id
-        #             max_distance = c_avg_distance
-
-        # elif distance == "cosine":
-        #     # 2. check the client with the largest average distance w.r.t. the current global model
-        #     for c in self.selected_clients:
-        #         c_avg_distance += np.dot(current_server_fc1, c.model.fc1.weight.data.clone()) / (np.norm(current_server_fc1) * np.norm(c.model.fc1.weight.data.clone()))
-        #         c_avg_distance += np.dot(current_server_fc2, c.model.fc2.weight.data.clone()) / (np.norm(current_server_fc2) * np.norm(c.model.fc2.weight.data.clone()))
-        #         c_avg_distance += np.dot(current_server_fc3, c.model.fc3.weight.data.clone()) / (np.norm(current_server_fc3) * np.norm(c.model.fc3.weight.data.clone()))
-
-        #         c_avg_distance = c_avg_distance / 3
-                
-        #         if c_avg_distance > max_distance:
-        #             self.current_anomalous_client = c.id
-        #             max_distance = c_avg_distance
-
-        # logging.info("Current anomalous is: {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, distance, max_distance))
+            
+        logging.info("Current anomalous is: {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, norm, max_distance))
 
 
     def update_averaged_weights(self):
