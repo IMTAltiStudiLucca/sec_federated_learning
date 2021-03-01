@@ -677,6 +677,7 @@ class Client:
             c_avg_distance = c_avg_distance / 3
 
             self.distance = c_avg_distance
+            return self.distance
 
     def get_distance_cnn(self, norm='fro'):
         with torch.no_grad():
