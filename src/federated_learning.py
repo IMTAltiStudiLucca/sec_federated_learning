@@ -417,9 +417,9 @@ class Server:
         elif distance == "cosine":
 
             for c in self.selected_clients:
-                c_avg_distance += (1 - sp.distance.cdist(current_server_fc1, c.model.fc1.weight.data, distance))
-                c_avg_distance += (1 - sp.distance.cdist(current_server_fc2, c.model.fc2.weight.data, distance))
-                c_avg_distance += (1 - sp.distance.cdist(current_server_fc3, c.model.fc3.weight.data, distance))
+                c_avg_distance += sp.distance.cdist(current_server_fc1, c.model.fc1.weight.data, distance)
+                c_avg_distance += sp.distance.cdist(current_server_fc2, c.model.fc2.weight.data, distance)
+                c_avg_distance += sp.distance.cdist(current_server_fc3, c.model.fc3.weight.data, distance)
                 
                 c_avg_distance = c_avg_distance / 3
                 
@@ -458,9 +458,9 @@ class Server:
         elif distance == "cosine":
 
             for c in self.selected_clients:
-                c_avg_distance += (1 - sp.distance.cdist(current_server_cnn1, c.model.cnn1.weight.data, distance))
-                c_avg_distance += (1 - sp.distance.cdist(current_server_cnn2, c.model.cnn2.weight.data, distance))
-                c_avg_distance += (1 - sp.distance.cdist(current_server_fc1, c.model.fc1.weight.data, distance))
+                c_avg_distance += sp.distance.cdist(current_server_cnn1, c.model.cnn1.weight.data, distance)
+                c_avg_distance += sp.distance.cdist(current_server_cnn2, c.model.cnn2.weight.data, distance)
+                c_avg_distance += sp.distance.cdist(current_server_fc1, c.model.fc1.weight.data, distance)
                 
                 c_avg_distance = c_avg_distance / 3
                 
