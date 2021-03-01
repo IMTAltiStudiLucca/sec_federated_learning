@@ -263,6 +263,8 @@ class Server:
         self.multiprocessing = multiprocessing
         self.network_type = network_type
 
+        self.current_anomalous_client = None
+
         self.selected_clients = []
         if self.network_type == 'NN':
             self.main_model = Net2nn()
@@ -383,10 +385,93 @@ class Server:
 
         return cnn1_mean_weight, cnn1_mean_bias, cnn2_mean_weight, cnn2_mean_bias, fc1_mean_weight, fc1_mean_bias
 
+    def get_anomalous_client_nn(self, distance="euclidean"):
+        
+        # 1. get current global model parameters
+        current_server_fc1 = self.main_model.fc1.weight.data
+        current_server_fc2 = self.main_model.fc2.weight.data
+        current_server_fc3 = self.main_model.fc3.weight.data
+
+        max_distance = 0
+        c_avg_distance = 0
+
+        if distance == "euclidean":
+
+            # 2. check the client with the largest average distance w.r.t. the current global model
+            for c in self.selected_clients:
+                c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data.clone())
+                c_avg_distance += np.linalg.norm(current_server_fc2 - c.model.fc2.weight.data.clone())
+                c_avg_distance += np.linalg.norm(current_server_fc3 - c.model.fc3.weight.data.clone())
+                
+                c_avg_distance = c_avg_distance / 3
+                
+                if c_avg_distance > max_distance:
+                    self.current_anomalous_client = c.id
+                    max_distance = c_avg_distance
+
+        elif distance == "cosine":
+            # 2. check the client with the largest average distance w.r.t. the current global model
+            for c in self.selected_clients:
+                c_avg_distance += np.dot(current_server_fc1, c.model.fc1.weight.data.clone()) / (np.norm(current_server_fc1) * np.norm(c.model.fc1.weight.data.clone()))
+                c_avg_distance += np.dot(current_server_fc2, c.model.fc2.weight.data.clone()) / (np.norm(current_server_fc2) * np.norm(c.model.fc2.weight.data.clone()))
+                c_avg_distance += np.dot(current_server_fc3, c.model.fc3.weight.data.clone()) / (np.norm(current_server_fc3) * np.norm(c.model.fc3.weight.data.clone()))
+
+                c_avg_distance = c_avg_distance / 3
+                
+                if c_avg_distance > max_distance:
+                    self.current_anomalous_client = c.id
+                    max_distance = c_avg_distance
+
+        logging.info("Current anomalous is: {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, distance, max_distance))
+
+    def get_anomalous_client_cnn(self, distance="euclidean"):
+
+        return
+        
+        # # 1. get current global model parameters
+        # current_server_fc1 = self.main_model.fc1.weight.data
+        # current_server_fc2 = self.main_model.fc2.weight.data
+        # current_server_fc3 = self.main_model.fc3.weight.data
+
+        # max_distance = 0
+        # c_avg_distance = 0
+
+        # if distance == "euclidean":
+
+        #     # 2. check the client with the largest average distance w.r.t. the current global model
+        #     for c in self.selected_clients:
+        #         c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data.clone())
+        #         c_avg_distance += np.linalg.norm(current_server_fc2 - c.model.fc2.weight.data.clone())
+        #         c_avg_distance += np.linalg.norm(current_server_fc3 - c.model.fc3.weight.data.clone())
+                
+        #         c_avg_distance = c_avg_distance / 3
+                
+        #         if c_avg_distance > max_distance:
+        #             self.current_anomalous_client = c.id
+        #             max_distance = c_avg_distance
+
+        # elif distance == "cosine":
+        #     # 2. check the client with the largest average distance w.r.t. the current global model
+        #     for c in self.selected_clients:
+        #         c_avg_distance += np.dot(current_server_fc1, c.model.fc1.weight.data.clone()) / (np.norm(current_server_fc1) * np.norm(c.model.fc1.weight.data.clone()))
+        #         c_avg_distance += np.dot(current_server_fc2, c.model.fc2.weight.data.clone()) / (np.norm(current_server_fc2) * np.norm(c.model.fc2.weight.data.clone()))
+        #         c_avg_distance += np.dot(current_server_fc3, c.model.fc3.weight.data.clone()) / (np.norm(current_server_fc3) * np.norm(c.model.fc3.weight.data.clone()))
+
+        #         c_avg_distance = c_avg_distance / 3
+                
+        #         if c_avg_distance > max_distance:
+        #             self.current_anomalous_client = c.id
+        #             max_distance = c_avg_distance
+
+        # logging.info("Current anomalous is: {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, distance, max_distance))
+
+
     def update_averaged_weights(self):
         if self.network_type == 'NN':
+            self.get_anomalous_client_nn()
             self.update_averaged_weights_nn()
         elif self.network_type == 'CNN':
+            self.get_anomalous_client_cnn()
             self.update_averaged_weights_cnn()
 
     def update_averaged_weights_nn(self):
