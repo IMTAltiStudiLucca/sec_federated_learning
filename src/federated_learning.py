@@ -282,6 +282,9 @@ class Server:
         self.main_criterion = nn.CrossEntropyLoss()
         self.send_weights()
 
+    def get_current_anomalous_client(self):
+        return self.current_anomalous_client
+
     def send_weights(self):
         for c in self.list_of_clients:
             c.update_model_weights(self.main_model)
