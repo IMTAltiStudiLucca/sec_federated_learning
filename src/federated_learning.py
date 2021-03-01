@@ -287,6 +287,8 @@ class Server:
     def send_weights(self):
         for c in self.list_of_clients:
             c.update_model_weights(self.main_model)
+            # c.get_distance()
+            # logging.info('Distance after send_weights c: {} distance: {:.3f}'.format(c.id, c.distance))
 
     def training_clients(self):
         logging.debug("Server: training_clients()")
@@ -307,6 +309,8 @@ class Server:
         else:
             for c in self.selected_clients:
                 c.call_training(self.num_of_epochs)
+                c.get_distance()
+                # logging.info("Client {}: distance {:.3f}".format(c.id, c.distance) )
 
     def get_averaged_weights_nn(self):
 
@@ -388,74 +392,87 @@ class Server:
 
         return cnn1_mean_weight, cnn1_mean_bias, cnn2_mean_weight, cnn2_mean_bias, fc1_mean_weight, fc1_mean_bias
 
-    def get_anomalous_client_nn(self, norm="fro"):
+    def get_anomalous_client(self, norm="fro"):
         """
             - `norm` refers to the type of the norm to be calculated between the two weight matrices:
               by default this is "fro", which stands for Frobenius norm (a.k.a. L2-norm)
               Other possible values are those indicated by the numpy API's: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
               e.g., 1, np.inf, "nuc", etc.
         """
-        
+
         # 1. get current global model parameters
-        current_server_fc1 = self.main_model.fc1.weight.data
-        current_server_fc2 = self.main_model.fc2.weight.data
-        current_server_fc3 = self.main_model.fc3.weight.data
+        with torch.no_grad():
+            # current_server_fc1 = self.main_model.fc1.weight.data
+            # current_server_fc2 = self.main_model.fc2.weight.data
+            # current_server_fc3 = self.main_model.fc3.weight.data
 
-        max_distance = 0
-        c_avg_distance = 0
+            max_distance = 0
+            c_avg_distance = 0
 
-        # 2. check the client with the largest average distance w.r.t. the current global model
-        for c in self.selected_clients:
-            c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data, ord=norm)
-            c_avg_distance += np.linalg.norm(current_server_fc2 - c.model.fc2.weight.data, ord=norm)
-            c_avg_distance += np.linalg.norm(current_server_fc3 - c.model.fc3.weight.data, ord=norm)
-            
-            c_avg_distance = c_avg_distance / 3
-            
-            if c_avg_distance > max_distance:
-                self.current_anomalous_client = c.id
-                max_distance = c_avg_distance
-            
-        logging.info("Server: current anomalous client is {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, norm, max_distance))
+            # 2. check the client with the largest average distance w.r.t. the current global model
 
-    def get_anomalous_client_cnn(self, norm="fro"):
+            for c in self.selected_clients:
+                if c.distance > max_distance:
+                    self.current_anomalous_client = c.id
+                    max_distance = c.distance
 
-        """
-            - `norm` refers to the type of the norm to be calculated between the two weight matrices:
-              by default this is "fro", which stands for Frobenius norm (a.k.a. L2-norm)
-              Other possible values are those indicated by the numpy API's: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
-              e.g., 1, np.inf, "nuc", etc.
-        """
-        
-        # 1. get current global model parameters
-        current_server_cnn1 = self.main_model.cnn1.weight.data
-        current_server_cnn2 = self.main_model.cnn2.weight.data
-        current_server_fc1 = self.main_model.fc1.weight.data
+            # for c in self.selected_clients:
+            #     c_avg_distance += np.linalg.norm(current_server_fc1 -
+            #                                      c.model.fc1.weight.data, ord=norm)
+            #     c_avg_distance += np.linalg.norm(current_server_fc2 -
+            #                                      c.model.fc2.weight.data, ord=norm)
+            #     c_avg_distance += np.linalg.norm(current_server_fc3 -
+            #                                      c.model.fc3.weight.data, ord=norm)
 
-        max_distance = 0
-        c_avg_distance = 0
+            #     c_avg_distance = c_avg_distance / 3
 
-        # 2. check the client with the largest average distance w.r.t. the current global model
-        for c in self.selected_clients:
-            c_avg_distance += np.linalg.norm(current_server_cnn1 - c.model.cnn1.weight.data, ord=norm)
-            c_avg_distance += np.linalg.norm(current_server_cnn2 - c.model.cnn2.weight.data, ord=norm)
-            c_avg_distance += np.linalg.norm(current_server_fc1 - c.model.fc1.weight.data, ord=norm)
-            
-            c_avg_distance = c_avg_distance / 3
-            
-            if c_avg_distance > max_distance:
-                self.current_anomalous_client = c.id
-                max_distance = c_avg_distance
-            
-        logging.info("Server: current anomalous is {:s} [{:s} distance = {:.3f}]".format(self.current_anomalous_client, norm, max_distance))
+            #     if c_avg_distance > max_distance:
+            #         self.current_anomalous_client = c.id
+            #         max_distance = c_avg_distance
 
+            logging.info("Server: current anomalous client is {:s} [{:s} distance = {:.3f}]".format(
+                self.current_anomalous_client, norm, max_distance))
+
+    # def get_anomalous_client_cnn(self, norm="fro"):
+    #     """
+    #         - `norm` refers to the type of the norm to be calculated between the two weight matrices:
+    #           by default this is "fro", which stands for Frobenius norm (a.k.a. L2-norm)
+    #           Other possible values are those indicated by the numpy API's: https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html
+    #           e.g., 1, np.inf, "nuc", etc.
+    #     """
+
+    #     # 1. get current global model parameters
+    #     with torch.no_grad():
+    #         current_server_cnn1 = self.main_model.cnn1.weight.data
+    #         current_server_cnn2 = self.main_model.cnn2.weight.data
+    #         current_server_fc1 = self.main_model.fc1.weight.data
+
+    #         max_distance = 0
+    #         c_avg_distance = 0
+
+    #         # 2. check the client with the largest average distance w.r.t. the current global model
+    #         for c in self.selected_clients:
+    #             c_avg_distance += np.linalg.norm(current_server_cnn1 -
+    #                                              c.model.cnn1.weight.data, ord=norm)
+    #             c_avg_distance += np.linalg.norm(current_server_cnn2 -
+    #                                              c.model.cnn2.weight.data, ord=norm)
+    #             c_avg_distance += np.linalg.norm(current_server_fc1 -
+    #                                              c.model.fc1.weight.data, ord=norm)
+
+    #             c_avg_distance = c_avg_distance / 3
+
+    #             if c_avg_distance > max_distance:
+    #                 self.current_anomalous_client = c.id
+    #                 max_distance = c_avg_distance
+
+    #         logging.info("Server: current anomalous is {:s} [{:s} distance = {:.3f}]".format(
+    #             self.current_anomalous_client, norm, max_distance))
 
     def update_averaged_weights(self):
+        self.get_anomalous_client()
         if self.network_type == 'NN':
-            self.get_anomalous_client_nn()
             self.update_averaged_weights_nn()
         elif self.network_type == 'CNN':
-            self.get_anomalous_client_cnn()
             self.update_averaged_weights_cnn()
 
     def update_averaged_weights_nn(self):
@@ -497,6 +514,7 @@ class Server:
         else:
             return None
 
+
 class Client:
     '''A client who has its own dataset to use for training.
        The main methods of the Client class are:
@@ -516,6 +534,8 @@ class Client:
         self.momentum = momentum
         self.batch_size = batch_size
         self.network_type = network_type
+        self.main_model = None
+        self.distance = 0
         # training and test can be splitted inside the client class
         # now we are passing them while instantiate the class
 
@@ -561,6 +581,7 @@ class Client:
         self.test_loss = 1
 
     def update_model_weights(self, main_model):
+        self.main_model = main_model
         if self.network_type == 'NN':
             self.update_model_weights_nn(main_model)
         elif self.network_type == 'CNN':
@@ -596,7 +617,6 @@ class Client:
 
             self.train_loss, self.train_accuracy = self.train(train_dl)
             self.test_loss, self.test_accuracy = self.validation(test_dl)
-
             logging.debug("Client: {}".format(self.id) + " | epoch: {:3.0f}".format(epoch + 1) +
                           " | train accuracy: {:7.5f}".format(self.train_accuracy) + " | test accuracy: {:7.5f}".format(self.test_accuracy))
 
@@ -637,6 +657,52 @@ class Client:
         correct /= len(test_dl.dataset)
 
         return (test_loss, correct)
+
+    def get_distance_nn(self, norm='fro'):
+        with torch.no_grad():
+            current_server_fc1 = self.main_model.fc1.weight.data
+            current_server_fc2 = self.main_model.fc2.weight.data
+            current_server_fc3 = self.main_model.fc3.weight.data
+
+            c_avg_distance = 0
+
+            # 2. check the client with the largest average distance w.r.t. the current global model
+            c_avg_distance += np.linalg.norm(current_server_fc1 -
+                                             self.model.fc1.weight.data, ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_fc2 -
+                                             self.model.fc2.weight.data, ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_fc3 -
+                                             self.model.fc3.weight.data, ord=norm)
+
+            c_avg_distance = c_avg_distance / 3
+
+            self.distance = c_avg_distance
+
+    def get_distance_cnn(self, norm='fro'):
+        with torch.no_grad():
+            current_server_cnn1 = self.main_model.cnn1.weight.data
+            current_server_cnn2 = self.main_model.cnn2.weight.data
+            current_server_fc1 = self.main_model.fc1.weight.data
+
+            c_avg_distance = 0
+
+            # 2. check the client with the largest average distance w.r.t. the current global model
+            c_avg_distance += np.linalg.norm(current_server_cnn1 -
+                                             self.model.cnn1.weight.data, ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_cnn2 -
+                                             self.model.cnn2.weight.data, ord=norm)
+            c_avg_distance += np.linalg.norm(current_server_fc1 -
+                                             self.model.fc1.weight.data, ord=norm)
+
+            c_avg_distance = c_avg_distance / 3
+
+            self.distance = c_avg_distance
+
+    def get_distance(self, norm='fro'):
+        if self.network_type == 'NN':
+            self.get_distance_nn(norm)
+        elif self.network_type == 'CNN':
+            self.get_distance_cnn(norm)
 
     def predict(self, data):
         self.model.eval()
